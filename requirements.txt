@@ -1,0 +1,21 @@
+#pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+
+# Core dependencies
+numpy
+matplotlib
+pillow
+scikit-learn
+tqdm
+pandas
+scipy
+opencv-python
+timm
+shap
+imbalanced-learn
+mlflow
+jupyter
+jupyterlab 
+
+# Model-specific dependencies
+einops  # Required for ViT model (for tensor rearrangement) 
