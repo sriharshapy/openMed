@@ -19,3 +19,13 @@ jupyterlab
 
 # Model-specific dependencies
 einops  # Required for ViT model (for tensor rearrangement) 
+
+# FastAPI middleware dependencies
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]>=1.7.2
+aiofiles 
+
+open-webui

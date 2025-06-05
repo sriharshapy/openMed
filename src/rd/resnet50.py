@@ -23,9 +23,12 @@ from torch.backends import mps
 import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
+import cv2
 
 import mlflow
 import mlflow.pytorch
+import mlflow.sklearn
+from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import roc_auc_score, accuracy_score, f1_score, precision_score, confusion_matrix
 from imblearn.metrics import sensitivity_score, specificity_score
 
@@ -52,13 +55,97 @@ def set_seed(seed=42):
     torch.cuda.manual_seed_all(seed)
 
 # ============================================================================
+# GRADCAM IMPLEMENTATION
+# ============================================================================
+
+class GradCAM:
+    """GradCAM implementation for visualization."""
+    
+    def __init__(self, model, target_layer):
+        self.model = model
+        self.target_layer = target_layer
+        self.gradients = None
+        self.activations = None
+        
+        # Register hooks
+        self.forward_hook = self.target_layer.register_forward_hook(self.save_activation)
+        self.backward_hook = self.target_layer.register_full_backward_hook(self.save_gradient)
+    
+    def save_activation(self, module, input, output):
+        self.activations = output.detach()
+    
+    def save_gradient(self, module, grad_input, grad_output):
+        self.gradients = grad_output[0].detach()
+    
+    def generate_cam(self, input_image, class_idx=None):
+        """Generate GradCAM heatmap."""
+        # Enable gradients and set model to train mode for gradient computation
+        input_image.requires_grad_(True)
+        original_mode = self.model.training
+        self.model.train()
+        
+        # Reset gradients and activations
+        self.gradients = None
+        self.activations = None
+        
+        # Forward pass - call resnet50 directly to avoid recursion
+        output = self.model.resnet50(input_image)
+        
+        if class_idx is None:
+            class_idx = output.argmax(dim=1).item()
+        elif isinstance(class_idx, torch.Tensor):
+            class_idx = class_idx.item()
+        
+        # Zero gradients
+        self.model.zero_grad()
+        
+        # Backward pass on the specific class score
+        class_score = output[0, class_idx]
+        class_score.backward(retain_graph=True)
+        
+        # Check if gradients and activations were captured
+        if self.gradients is None:
+            raise RuntimeError("Gradients were not captured. Check hook registration.")
+        if self.activations is None:
+            raise RuntimeError("Activations were not captured. Check hook registration.")
+        
+        # Generate CAM
+        gradients = self.gradients[0]  # [C, H, W]
+        activations = self.activations[0]  # [C, H, W]
+        
+        # Global average pooling of gradients
+        weights = torch.mean(gradients, dim=(1, 2))  # [C]
+        
+        # Weighted combination of activation maps
+        cam = torch.zeros(activations.shape[1:], dtype=torch.float32, device=activations.device)  # [H, W]
+        for i, w in enumerate(weights):
+            cam += w * activations[i, :, :]
+        
+        # Apply ReLU
+        cam = F.relu(cam)
+        
+        # Normalize
+        if cam.max() > 0:
+            cam = (cam - cam.min()) / (cam.max() - cam.min())
+        
+        # Restore original model mode
+        self.model.train(original_mode)
+        
+        return cam.detach().cpu().numpy()
+    
+    def remove_hooks(self):
+        """Remove the registered hooks."""
+        self.forward_hook.remove()
+        self.backward_hook.remove()
+
+# ============================================================================
 # MODEL ARCHITECTURE
 # ============================================================================
 
 class ResNet50FineTuned(nn.Module):
     """ResNet50 with ImageNet pretrained weights, fine-tuning only the last layer."""
     
-    def __init__(self, num_classes=2, freeze_features=True):
+    def __init__(self, num_classes=2, freeze_features=True, enable_gradcam=False):
         super(ResNet50FineTuned, self).__init__()
         
         # Load pretrained ResNet50
@@ -78,14 +165,134 @@ class ResNet50FineTuned(nn.Module):
         for param in self.resnet50.fc.parameters():
             param.requires_grad = True
             
+        # Initialize GradCAM if enabled
+        self.enable_gradcam = enable_gradcam
+        self.gradcam = None
+        if enable_gradcam:
+            # Use the last convolutional layer before avgpool (layer4[-1].conv3 in ResNet50)
+            target_layer = self.resnet50.layer4[-1].conv3
+            self.gradcam = GradCAM(self, target_layer)
+            
         print(f"ResNet50 loaded with ImageNet weights. Final layer: {num_features} -> {num_classes}")
         if freeze_features:
             print("All layers frozen except final classifier layer")
         else:
             print("All layers trainable")
+        if enable_gradcam:
+            print("GradCAM functionality enabled")
     
-    def forward(self, x):
-        return self.resnet50(x)
+    def forward(self, x, return_gradcam=False, gradcam_class_idx=None):
+        """
+        Forward pass with optional GradCAM generation.
+        
+        Args:
+            x: Input tensor
+            return_gradcam: Whether to return GradCAM heatmap along with predictions
+            gradcam_class_idx: Specific class index for GradCAM (if None, uses predicted class)
+            
+        Returns:
+            If return_gradcam=False: predictions tensor
+            If return_gradcam=True: tuple of (predictions, gradcam_heatmap)
+        """
+        # Standard forward pass
+        predictions = self.resnet50(x)
+        
+        # Return only predictions if GradCAM not requested or not enabled
+        if not return_gradcam or not self.enable_gradcam or self.gradcam is None:
+            return predictions
+        
+        # Generate GradCAM heatmap
+        try:
+            gradcam_heatmap = self.gradcam.generate_cam(x, gradcam_class_idx)
+            return predictions, gradcam_heatmap
+        except Exception as e:
+            print(f"Warning: GradCAM generation failed: {e}")
+            return predictions
+    
+    def enable_gradcam_mode(self):
+        """Enable GradCAM functionality if not already enabled."""
+        if not self.enable_gradcam:
+            target_layer = self.resnet50.layer4[-1].conv3
+            self.gradcam = GradCAM(self, target_layer)
+            self.enable_gradcam = True
+            print("GradCAM functionality enabled")
+    
+    def disable_gradcam_mode(self):
+        """Disable GradCAM functionality and remove hooks."""
+        if self.enable_gradcam and self.gradcam is not None:
+            self.gradcam.remove_hooks()
+            self.gradcam = None
+            self.enable_gradcam = False
+            print("GradCAM functionality disabled")
+    
+    def get_gradcam_overlay(self, input_image, original_image=None, alpha=0.5, colormap=cv2.COLORMAP_JET):
+        """
+        Generate GradCAM overlay on the original image.
+        
+        Args:
+            input_image: Preprocessed input tensor for the model
+            original_image: Original image (PIL Image or numpy array) for overlay
+            alpha: Transparency factor for the heatmap overlay
+            colormap: OpenCV colormap for the heatmap
+            
+        Returns:
+            tuple: (colored_heatmap, overlaid_image) or None if GradCAM not enabled
+        """
+        if not self.enable_gradcam or self.gradcam is None:
+            print("GradCAM not enabled. Call enable_gradcam_mode() first.")
+            return None
+        
+        # Get predictions and GradCAM heatmap - gradients are needed for GradCAM
+        predictions, gradcam_heatmap = self.forward(input_image, return_gradcam=True)
+        
+        # If no original image provided, try to create one from input tensor
+        if original_image is None:
+            # Denormalize the input tensor (assuming ImageNet normalization)
+            mean = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
+            std = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
+            
+            denorm_image = input_image * std + mean
+            denorm_image = torch.clamp(denorm_image, 0, 1)
+            
+            # Convert to numpy
+            original_image = denorm_image[0].permute(1, 2, 0).cpu().numpy()
+        
+        # Convert PIL Image to numpy if needed
+        if hasattr(original_image, 'convert'):  # PIL Image
+            original_image = np.array(original_image.convert('RGB'))
+        
+        # Ensure image is in the right format (0-255 uint8)
+        if original_image.max() <= 1.0:
+            original_image = (original_image * 255).astype(np.uint8)
+        else:
+            original_image = original_image.astype(np.uint8)
+        
+        # Ensure heatmap is in the right format (0-255 uint8)
+        if gradcam_heatmap.max() <= 1.0:
+            gradcam_heatmap = (gradcam_heatmap * 255).astype(np.uint8)
+        else:
+            gradcam_heatmap = gradcam_heatmap.astype(np.uint8)
+        
+        # Resize heatmap to match image size if needed
+        if gradcam_heatmap.shape != original_image.shape[:2]:
+            gradcam_heatmap = cv2.resize(gradcam_heatmap, (original_image.shape[1], original_image.shape[0]))
+        
+        # Apply colormap to heatmap
+        colored_heatmap = cv2.applyColorMap(gradcam_heatmap, colormap)
+        
+        # Convert BGR to RGB for display
+        colored_heatmap_rgb = cv2.cvtColor(colored_heatmap, cv2.COLOR_BGR2RGB)
+        
+        # Ensure image is RGB
+        if len(original_image.shape) == 3 and original_image.shape[2] == 3:
+            image_rgb = original_image
+        else:
+            image_rgb = cv2.cvtColor(original_image, cv2.COLOR_GRAY2RGB)
+        
+        # Create overlay using addWeighted
+        overlay = cv2.addWeighted(image_rgb, 1-alpha, colored_heatmap_rgb, alpha, 0)
+        
+        return colored_heatmap_rgb, overlay
     
     def get_trainable_params(self):
         """Return only trainable parameters."""
@@ -94,6 +301,54 @@ class ResNet50FineTuned(nn.Module):
     def get_num_trainable_params(self):
         """Return number of trainable parameters."""
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
+
+class SklearnResNet50Wrapper(BaseEstimator, ClassifierMixin):
+    """Scikit-learn compatible wrapper for PyTorch ResNet50 model."""
+    
+    def __init__(self, pytorch_model, device, transform=None):
+        self.pytorch_model = pytorch_model
+        self.device = device
+        self.transform = transform
+        self.classes_ = np.array([0, 1])  # Binary classification
+        
+    def fit(self, X, y):
+        """Dummy fit method for scikit-learn compatibility."""
+        # The actual training is done outside this wrapper
+        return self
+    
+    def predict(self, X):
+        """Predict class labels for samples in X."""
+        probabilities = self.predict_proba(X)
+        return np.argmax(probabilities, axis=1)
+    
+    def predict_proba(self, X):
+        """Predict class probabilities for samples in X."""
+        self.pytorch_model.eval()
+        all_probabilities = []
+        
+        with torch.no_grad():
+            for x in X:
+                if self.transform and not isinstance(x, torch.Tensor):
+                    if isinstance(x, np.ndarray):
+                        # Convert numpy array to PIL Image for transforms
+                        x = Image.fromarray((x * 255).astype(np.uint8))
+                    x = self.transform(x)
+                
+                if not isinstance(x, torch.Tensor):
+                    x = torch.tensor(x, dtype=torch.float32)
+                
+                x = x.unsqueeze(0).to(self.device)  # Add batch dimension
+                outputs = self.pytorch_model(x)
+                probabilities = F.softmax(outputs, dim=1)
+                all_probabilities.append(probabilities.cpu().numpy()[0])
+        
+        return np.array(all_probabilities)
+    
+    def score(self, X, y):
+        """Return the mean accuracy on the given test data and labels."""
+        predictions = self.predict(X)
+        return accuracy_score(y, predictions)
 
 # ============================================================================
 # DATASET AND DATA UTILITIES
@@ -484,7 +739,42 @@ def train_resnet50_model(
     
     # Log final model and end MLflow run
     if use_mlflow:
-        mlflow.pytorch.log_model(model, "final_model")
+        # Create sklearn wrapper for the PyTorch model
+        sklearn_model = SklearnResNet50Wrapper(
+            pytorch_model=model,
+            device=device,
+            transform=transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=normalize_mean, std=normalize_std)
+            ])
+        )
+        
+        # Get a sample from training data for input_example
+        # Convert a few training samples to the format expected by sklearn wrapper
+        sample_images = []
+        sample_count = 0
+        for images, _ in train_loader:
+            for img in images:
+                if sample_count >= 5:  # Get 5 sample images
+                    break
+                # Convert tensor back to numpy array (0-1 range)
+                img_np = img.permute(1, 2, 0).cpu().numpy()
+                # Ensure values are in 0-1 range
+                img_np = np.clip(img_np, 0, 1)
+                sample_images.append(img_np)
+                sample_count += 1
+            if sample_count >= 5:
+                break
+        
+        X_train_sample = np.array(sample_images)
+        
+        mlflow.sklearn.log_model(
+            sk_model=sklearn_model,
+            artifact_path="sklearn-model",
+            input_example=X_train_sample,
+            registered_model_name="resnet50-chest-xray-model"
+        )
         mlflow.end_run()
     
     return model, best_accuracy
@@ -511,7 +801,7 @@ def main():
     config = {
         "root_path": "C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray",  # Updated path for chest x-ray data
         "freeze_features": True,  # Only fine-tune the last layer
-        "epochs": 15,  # More epochs for full dataset training
+        "epochs": 1,  # More epochs for full dataset training
         "batch_size": 32,  # Larger batch size for full dataset
         "lr": 1e-3,  # Higher learning rate for the new classifier layer
         "seed": 42,
