@@ -84,11 +84,21 @@ cd src/middleware
 python run_backend.py
 ```
 
-The backend will start on `http://localhost:8000` with the following endpoints:
-- **API Documentation**: http://localhost:8000/docs
+**Console Output:** The backend will display comprehensive startup information including:
+- Server details (host: 0.0.0.0, port: 8000)
+- API documentation URLs
+- Available endpoints
+- OpenWebUI integration instructions
+
+**Available Services:**
+- **Main API Server**: http://localhost:8000
+- **Swagger UI (Interactive API Docs)**: http://localhost:8000/docs
+- **ReDoc (Alternative API Docs)**: http://localhost:8000/redoc
+- **OpenAPI Specification**: http://localhost:8000/openapi.json
 - **Health Check**: http://localhost:8000/health
 - **Models Endpoint**: http://localhost:8000/v1/models
 - **Chat Completions**: http://localhost:8000/v1/chat/completions
+- **Embeddings**: http://localhost:8000/v1/embeddings
 
 ### Step 2: Start OpenWebUI
 
@@ -99,6 +109,12 @@ OpenWebUI provides the chat interface for interacting with the medical AI models
 # From the project root directory
 .\run_openweb.bat
 ```
+
+**Console Output:** The script will display:
+- Environment configuration details
+- Server startup information
+- Interface access URL
+- Backend connection requirements
 
 #### Option B: Manual setup (Cross-platform)
 
@@ -127,7 +143,12 @@ export ENABLE_OPENAI_API="true"
 open-webui serve --host 0.0.0.0 --port 5000
 ```
 
-OpenWebUI will be available at: http://localhost:5000
+**OpenWebUI Default Configuration:**
+- **Interface URL**: http://localhost:5000
+- **Default Host**: 0.0.0.0 (accessible from all network interfaces)
+- **Default Port**: 5000
+- **Backend Integration**: Connects to http://localhost:8000/v1
+- **API Key**: Can be any value (e.g., "your-api-key")
 
 ## 🔧 Configuration
 
@@ -137,6 +158,7 @@ The system is configured to use:
 - **Backend API**: http://localhost:8000/v1
 - **Frontend Interface**: http://localhost:5000
 - **API Key**: Set your API key in the environment variables
+- **Swagger UI**: http://localhost:8000/docs (for API testing and exploration)
 
 ### Model Configuration
 
@@ -147,7 +169,30 @@ Models are configured in `src/middleware/config.py`. You can modify model parame
 1. **Start the Backend**: Follow Step 1 above to start the FastAPI middleware
 2. **Start OpenWebUI**: Follow Step 2 to start the web interface
 3. **Access the Interface**: Open your browser to http://localhost:5000
-4. **Start Chatting**: Begin interacting with the medical AI models through the chat interface
+4. **Explore APIs**: Visit http://localhost:8000/docs for interactive API documentation
+5. **Start Chatting**: Begin interacting with the medical AI models through the chat interface
+
+## 🛠️ API Documentation & Testing
+
+### Swagger UI (Recommended for Development)
+- **URL**: http://localhost:8000/docs
+- **Features**: 
+  - Interactive API testing
+  - Request/response examples
+  - Parameter documentation
+  - Real-time API calls
+  - Authentication testing
+
+### ReDoc (Alternative Documentation)
+- **URL**: http://localhost:8000/redoc
+- **Features**:
+  - Clean, readable documentation
+  - Code examples in multiple languages
+  - Comprehensive schema information
+
+### OpenAPI Specification
+- **URL**: http://localhost:8000/openapi.json
+- **Usage**: Import into API testing tools like Postman, Insomnia, etc.
 
 ## 🐛 Troubleshooting
 
@@ -164,7 +209,14 @@ Models are configured in `src/middleware/config.py`. You can modify model parame
 **OpenWebUI Connection Issues:**
 - Verify the backend is running on http://localhost:8000
 - Check that environment variables are set correctly
-- Ensure firewall isn't blocking the ports
+- Ensure firewall isn't blocking the ports (8000 and 5000)
+- Verify OpenWebUI can reach the backend: test http://localhost:8000/health
+
+**Swagger UI Not Loading:**
+- Ensure the backend server is running
+- Check browser console for errors
+- Try accessing http://localhost:8000/health first
+- Clear browser cache if necessary
 
 **CUDA/GPU Issues:**
 - Install appropriate PyTorch version for your system
@@ -175,7 +227,7 @@ Models are configured in `src/middleware/config.py`. You can modify model parame
 To run in development mode with auto-reload:
 
 ```bash
-# Backend with auto-reload
+# Backend with auto-reload (already enabled in run_backend.py)
 cd src/middleware
 uvicorn openai_backend:app --reload --host 0.0.0.0 --port 8000
 
@@ -187,6 +239,7 @@ open-webui serve --host 0.0.0.0 --port 5000 --dev
 
 - **FastAPI Documentation**: https://fastapi.tiangolo.com/
 - **OpenWebUI Documentation**: https://docs.openwebui.com/
+- **Swagger UI Guide**: https://swagger.io/tools/swagger-ui/
 - **Project-specific documentation**: Check `src/middleware/README.md` for detailed API information
 
 ## 🤝 Contributing
@@ -194,7 +247,7 @@ open-webui serve --host 0.0.0.0 --port 5000 --dev
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes
-4. Test thoroughly
+4. Test thoroughly using Swagger UI at http://localhost:8000/docs
 5. Submit a pull request
 
 ## 📄 License
