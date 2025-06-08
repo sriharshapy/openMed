@@ -28,4 +28,8 @@ python-jose[cryptography]
 passlib[bcrypt]>=1.7.2
 aiofiles 
 
+# OpenAI and environment management
+openai
+python-dotenv
+
 open-webui

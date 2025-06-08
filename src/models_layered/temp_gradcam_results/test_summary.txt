@@ -1,0 +1,106 @@
+ResNet50 Split Architecture Test Summary
+==================================================
+Test Date: 2025-06-06 14:29:14
+Number of test images: 10
+
+Individual Results:
+--------------------
+Image 1:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\NORMAL\NORMAL-4363211-0001.jpeg
+  True Label: 0 (NORMAL)
+  Predicted: 0 (NORMAL)
+  Confidence: 0.517
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_normal_1_NORMAL-4363211-0001.png
+
+Image 2:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\NORMAL\NORMAL-2280080-0001.jpeg
+  True Label: 0 (NORMAL)
+  Predicted: 0 (NORMAL)
+  Confidence: 0.917
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_normal_2_NORMAL-2280080-0001.png
+
+Image 3:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\NORMAL\NORMAL-2107985-0001.jpeg
+  True Label: 0 (NORMAL)
+  Predicted: 0 (NORMAL)
+  Confidence: 0.526
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_normal_3_NORMAL-2107985-0001.png
+
+Image 4:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\NORMAL\NORMAL-4886177-0001.jpeg
+  True Label: 0 (NORMAL)
+  Predicted: 0 (NORMAL)
+  Confidence: 0.792
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_normal_4_NORMAL-4886177-0001.png
+
+Image 5:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\NORMAL\NORMAL-1283091-0001.jpeg
+  True Label: 0 (NORMAL)
+  Predicted: 0 (NORMAL)
+  Confidence: 0.519
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_normal_5_NORMAL-1283091-0001.png
+
+Image 6:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\PNEUMONIA\BACTERIA-1602272-0003.jpeg
+  True Label: 1 (PNEUMONIA)
+  Predicted: 1 (PNEUMONIA)
+  Confidence: 0.989
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_pneumonia_1_BACTERIA-1602272-0003.png
+
+Image 7:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\PNEUMONIA\BACTERIA-9182718-0001.jpeg
+  True Label: 1 (PNEUMONIA)
+  Predicted: 1 (PNEUMONIA)
+  Confidence: 0.968
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_pneumonia_2_BACTERIA-9182718-0001.png
+
+Image 8:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\PNEUMONIA\VIRUS-9039335-0001.jpeg
+  True Label: 1 (PNEUMONIA)
+  Predicted: 1 (PNEUMONIA)
+  Confidence: 0.991
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_pneumonia_3_VIRUS-9039335-0001.png
+
+Image 9:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\PNEUMONIA\BACTERIA-1768914-0002.jpeg
+  True Label: 1 (PNEUMONIA)
+  Predicted: 1 (PNEUMONIA)
+  Confidence: 0.964
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_pneumonia_4_BACTERIA-1768914-0002.png
+
+Image 10:
+  Image Path: C:/Users/sriha/NEU/shlabs/HP_NVIDIA/CellData/chest_xray/test\PNEUMONIA\BACTERIA-5240350-0001.jpeg
+  True Label: 1 (PNEUMONIA)
+  Predicted: 1 (PNEUMONIA)
+  Confidence: 0.999
+  Correct: True
+  Heatmap Shape: (7, 7)
+  Saved to: gradcam_pneumonia_5_BACTERIA-5240350-0001.png
+
+Overall Statistics:
+------------------
+Accuracy: 10/10 (100.0%)
+Average Confidence: 0.818
+
+Class-wise Statistics:
+----------------------
+NORMAL: 5/5 (100.0%)
+PNEUMONIA: 5/5 (100.0%)

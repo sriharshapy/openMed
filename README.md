@@ -1,259 +1,405 @@
-# OpenMed Project
+# OpenMed: AI-Powered Medical Imaging Analysis Platform
 
-OpenMed is a medical AI project that combines a FastAPI backend middleware with OpenWebUI for an intuitive chat interface. The system provides OpenAI-compatible APIs for medical AI models.
+<div align="center">
 
-## 🏗️ Project Structure
+![OpenMed Logo](https://img.shields.io/badge/OpenMed-Medical%20AI%20Platform-blue?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red?style=flat-square&logo=pytorch)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green?style=flat-square&logo=fastapi)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT%20Powered-black?style=flat-square&logo=openai)
+
+*Advanced AI-powered medical imaging analysis platform for multi-disease detection*
+
+</div>
+
+## 🏥 Overview
+
+OpenMed is a comprehensive AI-powered medical imaging analysis platform that combines deep learning, computer vision, and conversational AI to assist healthcare professionals in medical image interpretation. The system provides automated detection and classification for multiple medical conditions including pneumonia, tuberculosis, and brain tumors.
+
+### Key Features
+
+- 🔬 **Multi-Disease Detection**: Pneumonia, Tuberculosis, and Brain Tumor classification
+- 🤖 **Intelligent Agent**: OpenAI-powered conversational interface for medical analysis
+- 📊 **Visual Explanations**: GradCAM-based interpretability for clinical insights
+- 🌐 **Web Interface**: User-friendly OpenWebUI integration
+- 🔌 **API-First Design**: RESTful APIs for seamless integration
+- 📈 **MLflow Integration**: Comprehensive experiment tracking and model management
+- 🎯 **Transfer Learning**: Pre-trained ResNet50 and Vision Transformer models
+- 🛡️ **Production Ready**: Robust error handling and monitoring
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        A[OpenWebUI Interface]
+        B[Web Browser]
+    end
+    
+    subgraph "API Gateway"
+        C[OpenAI Compatible API]
+        D[Middleware Layer]
+    end
+    
+    subgraph "AI Services"
+        E[Intelligent Agent]
+        F[Medical Intent Classification]
+        G[Disease Detection Models]
+    end
+    
+    subgraph "ML Models"
+        H[ResNet50 Pneumonia]
+        I[ResNet50 Tuberculosis]
+        J[ResNet50 Brain Tumor]
+        K[Vision Transformer]
+    end
+    
+    subgraph "Analysis Tools"
+        L[GradCAM Visualization]
+        M[Feature Extraction]
+        N[Classification Layer]
+    end
+    
+    subgraph "Infrastructure"
+        O[MLflow Tracking]
+        P[Model Checkpoints]
+        Q[Data Storage]
+    end
+    
+    B --> A
+    A --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    G --> I
+    G --> J
+    G --> K
+    H --> L
+    I --> L
+    J --> L
+    K --> L
+    L --> M
+    M --> N
+    G --> O
+    O --> P
+    P --> Q
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8+
+- CUDA-compatible GPU (recommended)
+- 8GB+ RAM
+- 20GB+ storage space
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd openMed
+   ```
+
+2. **Run the setup script**
+   ```bash
+   # Windows
+   .\initial_setup.sh
+   
+   # Linux/Mac
+   chmod +x initial_setup.sh
+   ./initial_setup.sh
+   ```
+
+3. **Activate virtual environment**
+   ```bash
+   # Windows
+   .\venv\Scripts\activate
+   
+   # Linux/Mac
+   source venv/bin/activate
+   ```
+
+4. **Configure environment variables**
+   ```bash
+   # Create .env file
+   echo "OPENAI_API_KEY=your_openai_api_key_here" > .env
+   ```
+
+### Quick Launch
+
+1. **Start the backend API**
+   ```bash
+   cd src/middleware
+   python run_backend.py
+   ```
+
+2. **Launch the web interface**
+   ```bash
+   # Windows
+   run_openweb.bat
+   
+   # Linux/Mac
+   open-webui serve --host 0.0.0.0 --port 3000
+   ```
+
+3. **Access the interface**
+   - Web UI: http://localhost:3000
+   - API Documentation: http://localhost:8000/docs
+
+## 🔧 System Components
+
+### 1. Intelligent Agent (`src/agent/`)
+
+OpenAI-powered conversational agent that:
+- Analyzes user prompts for medical intent
+- Classifies requests into disease categories
+- Provides confidence scores and reasoning
+- Supports multi-turn conversations
+
+```python
+from src.agent.agent import analyze_medical_intent
+
+result = analyze_medical_intent("Can you check this chest X-ray for pneumonia?")
+print(result['wants_medical_analysis'])  # True
+print(result['disease_type'])  # 'pneumonia'
+print(result['confidence'])  # 0.95
+```
+
+### 2. Deep Learning Models (`src/rd/`)
+
+#### Supported Medical Conditions
+
+| Disease | Model | Classes | Accuracy | Data Type |
+|---------|-------|---------|----------|-----------|
+| Pneumonia | ResNet50 | 2 (Normal, Pneumonia) | >85% | Chest X-rays |
+| Tuberculosis | ResNet50 | 2 (Normal, TB) | >85% | Chest X-rays |
+| Brain Tumor | ResNet50 | 3 (Glioma, Meningioma, Tumor) | >70% | Brain MRI |
+
+#### Model Training
+
+```bash
+# Train pneumonia detection model
+cd src/rd
+python resnet50_PNEUMONIA.py
+
+# Train tuberculosis detection model
+python resnet50_tb_full.py
+
+# Train brain tumor classification model
+python resnet50_brain_tumor_full.py
+```
+
+### 3. API Services (`src/middleware/`)
+
+RESTful APIs with OpenAI compatibility:
+
+#### Core Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/models` | GET | List available models |
+| `/v1/chat/completions` | POST | Chat-based medical analysis |
+| `/v1/completions` | POST | Text completion |
+| `/health` | GET | System health check |
+
+#### Model-Specific APIs
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Feature Extractor | 6001 | Extract features from medical images |
+| Classifier | 6005 | Classify extracted features |
+
+### 4. Visual Explanations (`src/utils/`)
+
+GradCAM-based interpretability:
+- Highlights regions of interest in medical images
+- Provides visual explanations for model decisions
+- Supports clinical validation and trust
+
+```python
+from src.utils.gradcam import generate_gradcam
+
+# Generate GradCAM for pneumonia detection
+gradcam_result = generate_gradcam(
+    model_path="checkpoints/pneumonia_model.pth",
+    image_path="chest_xray.jpg",
+    target_class="pneumonia"
+)
+```
+
+## 📊 Monitoring and Tracking
+
+### MLflow Integration
+
+Each medical condition runs its own MLflow server:
+
+- **Pneumonia**: http://localhost:5000
+- **Tuberculosis**: http://localhost:5001
+- **Brain Tumor**: http://localhost:5002
+
+### Tracked Metrics
+
+- Training/Validation Accuracy
+- F1 Score, Precision, Recall
+- AUC-ROC scores
+- Confusion matrices
+- Model artifacts and checkpoints
+
+## 🔍 Usage Examples
+
+### 1. Web Interface Usage
+
+1. Open http://localhost:3000
+2. Upload medical image
+3. Ask: "Can you analyze this chest X-ray for pneumonia?"
+4. Review analysis results and GradCAM visualization
+
+### 2. API Usage
+
+```python
+import requests
+from PIL import Image
+import base64
+
+# Load and encode image
+with open("chest_xray.jpg", "rb") as f:
+    img_data = base64.b64encode(f.read()).decode()
+
+# Send analysis request
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "openmed-medical-v1",
+        "messages": [
+            {
+                "role": "user", 
+                "content": "Analyze this chest X-ray for pneumonia signs"
+            }
+        ],
+        "image": img_data
+    }
+)
+
+result = response.json()
+print(result['choices'][0]['message']['content'])
+```
+
+### 3. Direct Model Inference
+
+```python
+# Feature extraction
+response = requests.post(
+    "http://localhost:6001/extract_features",
+    json={"image_base64": img_data}
+)
+features = response.json()["features"]
+
+# Classification
+response = requests.post(
+    "http://localhost:6005/classify",
+    json={"features": features}
+)
+prediction = response.json()["predicted_classes"]
+```
+
+## 🛠️ Development
+
+### Project Structure
 
 ```
 openMed/
 ├── src/
-│   ├── middleware/          # FastAPI backend server
-│   ├── open-webui/         # OpenWebUI components
-│   ├── models/             # AI models
+│   ├── agent/              # Intelligent agent
+│   ├── middleware/         # API services
+│   ├── models_layered/     # Layered model APIs
+│   ├── rd/                 # Research & development models
 │   ├── utils/              # Utility functions
-│   └── tests/              # Test files
-├── weights/                # Model weights
-├── venv/                   # Virtual environment
-├── requirements.txt        # Python dependencies
-├── run_openweb.bat        # OpenWebUI startup script
+│   └── nb/                 # Jupyter notebooks
+├── checkpoints/            # Model checkpoints
+├── gradcam_results/        # GradCAM outputs
+├── mlruns/                 # MLflow experiments
+├── test_images/            # Test datasets
+├── docs/                   # Documentation
+├── requirements.txt        # Dependencies
 └── README.md              # This file
 ```
 
-## 🚀 Installation Instructions
+### Adding New Models
 
-### Prerequisites
+1. **Create model script** in `src/rd/`
+2. **Add GradCAM support** for interpretability
+3. **Configure MLflow** tracking
+4. **Update API endpoints** in middleware
+5. **Test integration** with web interface
 
-- Python 3.11 or higher
-- pip (Python package installer)
-- Git
+### Configuration
 
-### 1. Virtual Environment Setup
+Key configuration files:
+- `src/middleware/config.py` - API configuration
+- `requirements.txt` - Python dependencies
+- `.env` - Environment variables
 
-#### On Windows:
-```bash
-# Create virtual environment
-python -m venv venv
+## 🔐 Security Considerations
 
-# Activate virtual environment
-.\venv\Scripts\activate
+- API key authentication for OpenAI services
+- Input validation for medical images
+- Rate limiting on API endpoints
+- Secure file upload handling
+- CORS configuration for web interface
 
-# Verify activation (you should see (venv) in your prompt)
-where python
-```
+## 📈 Performance Optimization
 
-#### On macOS/Linux:
-```bash
-# Create virtual environment
-python3 -m venv venv
+### Recommended Hardware
 
-# Activate virtual environment
-source venv/bin/activate
+- **GPU**: NVIDIA RTX 3070+ (8GB VRAM)
+- **CPU**: 8+ cores
+- **RAM**: 16GB+
+- **Storage**: SSD with 50GB+ free space
 
-# Verify activation (you should see (venv) in your prompt)
-which python
-```
+### Optimization Tips
 
-### 2. Install Dependencies
-
-With your virtual environment activated:
-
-```bash
-# Install all required packages
-pip install -r requirements.txt
-
-# Install PyTorch with CUDA support (if you have NVIDIA GPU)
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-```
-
-**Note**: If you don't have a CUDA-compatible GPU, install the CPU version:
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
-
-## 🏃‍♂️ Running the Application
-
-### Step 1: Start the FastAPI Backend
-
-The FastAPI backend serves as the middleware that provides OpenAI-compatible APIs.
-
-```bash
-# Navigate to the middleware directory
-cd src/middleware
-
-# Run the backend server
-python run_backend.py
-```
-
-**Console Output:** The backend will display comprehensive startup information including:
-- Server details (host: 0.0.0.0, port: 8000)
-- API documentation URLs
-- Available endpoints
-- OpenWebUI integration instructions
-
-**Available Services:**
-- **Main API Server**: http://localhost:8000
-- **Swagger UI (Interactive API Docs)**: http://localhost:8000/docs
-- **ReDoc (Alternative API Docs)**: http://localhost:8000/redoc
-- **OpenAPI Specification**: http://localhost:8000/openapi.json
-- **Health Check**: http://localhost:8000/health
-- **Models Endpoint**: http://localhost:8000/v1/models
-- **Chat Completions**: http://localhost:8000/v1/chat/completions
-- **Embeddings**: http://localhost:8000/v1/embeddings
-
-### Step 2: Start OpenWebUI
-
-OpenWebUI provides the chat interface for interacting with the medical AI models.
-
-#### Option A: Using the provided batch script (Windows)
-```bash
-# From the project root directory
-.\run_openweb.bat
-```
-
-**Console Output:** The script will display:
-- Environment configuration details
-- Server startup information
-- Interface access URL
-- Backend connection requirements
-
-#### Option B: Manual setup (Cross-platform)
-
-**Set environment variables:**
-
-Windows (PowerShell):
-```powershell
-$env:OPENAI_API_BASE_URL="http://localhost:8000/v1"
-$env:OPENAI_API_KEY="your-api-key"
-$env:OLLAMA_BASE_URL=""
-$env:ENABLE_OLLAMA_API="false"
-$env:ENABLE_OPENAI_API="true"
-```
-
-macOS/Linux (Bash):
-```bash
-export OPENAI_API_BASE_URL="http://localhost:8000/v1"
-export OPENAI_API_KEY="your-api-key"
-export OLLAMA_BASE_URL=""
-export ENABLE_OLLAMA_API="false"
-export ENABLE_OPENAI_API="true"
-```
-
-**Start OpenWebUI:**
-```bash
-open-webui serve --host 0.0.0.0 --port 5000
-```
-
-**OpenWebUI Default Configuration:**
-- **Interface URL**: http://localhost:5000
-- **Default Host**: 0.0.0.0 (accessible from all network interfaces)
-- **Default Port**: 5000
-- **Backend Integration**: Connects to http://localhost:8000/v1
-- **API Key**: Can be any value (e.g., "your-api-key")
-
-## 🔧 Configuration
-
-### API Configuration
-
-The system is configured to use:
-- **Backend API**: http://localhost:8000/v1
-- **Frontend Interface**: http://localhost:5000
-- **API Key**: Set your API key in the environment variables
-- **Swagger UI**: http://localhost:8000/docs (for API testing and exploration)
-
-### Model Configuration
-
-Models are configured in `src/middleware/config.py`. You can modify model parameters, add new models, or change model paths there.
-
-## 📝 Usage
-
-1. **Start the Backend**: Follow Step 1 above to start the FastAPI middleware
-2. **Start OpenWebUI**: Follow Step 2 to start the web interface
-3. **Access the Interface**: Open your browser to http://localhost:5000
-4. **Explore APIs**: Visit http://localhost:8000/docs for interactive API documentation
-5. **Start Chatting**: Begin interacting with the medical AI models through the chat interface
-
-## 🛠️ API Documentation & Testing
-
-### Swagger UI (Recommended for Development)
-- **URL**: http://localhost:8000/docs
-- **Features**: 
-  - Interactive API testing
-  - Request/response examples
-  - Parameter documentation
-  - Real-time API calls
-  - Authentication testing
-
-### ReDoc (Alternative Documentation)
-- **URL**: http://localhost:8000/redoc
-- **Features**:
-  - Clean, readable documentation
-  - Code examples in multiple languages
-  - Comprehensive schema information
-
-### OpenAPI Specification
-- **URL**: http://localhost:8000/openapi.json
-- **Usage**: Import into API testing tools like Postman, Insomnia, etc.
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Virtual Environment Not Activating:**
-- Make sure you're running the activation command from the project root
-- On Windows, you might need to enable script execution: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
-
-**Backend Won't Start:**
-- Check if port 8000 is already in use: `netstat -ano | findstr :8000` (Windows) or `lsof -i :8000` (macOS/Linux)
-- Ensure all dependencies are installed: `pip list`
-
-**OpenWebUI Connection Issues:**
-- Verify the backend is running on http://localhost:8000
-- Check that environment variables are set correctly
-- Ensure firewall isn't blocking the ports (8000 and 5000)
-- Verify OpenWebUI can reach the backend: test http://localhost:8000/health
-
-**Swagger UI Not Loading:**
-- Ensure the backend server is running
-- Check browser console for errors
-- Try accessing http://localhost:8000/health first
-- Clear browser cache if necessary
-
-**CUDA/GPU Issues:**
-- Install appropriate PyTorch version for your system
-- Check CUDA compatibility: `nvidia-smi` (if you have NVIDIA GPU)
-
-### Development Mode
-
-To run in development mode with auto-reload:
-
-```bash
-# Backend with auto-reload (already enabled in run_backend.py)
-cd src/middleware
-uvicorn openai_backend:app --reload --host 0.0.0.0 --port 8000
-
-# OpenWebUI with development settings
-open-webui serve --host 0.0.0.0 --port 5000 --dev
-```
-
-## 📚 Additional Resources
-
-- **FastAPI Documentation**: https://fastapi.tiangolo.com/
-- **OpenWebUI Documentation**: https://docs.openwebui.com/
-- **Swagger UI Guide**: https://swagger.io/tools/swagger-ui/
-- **Project-specific documentation**: Check `src/middleware/README.md` for detailed API information
+- Use batch processing for multiple images
+- Enable GPU acceleration for inference
+- Implement caching for frequent requests
+- Use model quantization for deployment
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test thoroughly using Swagger UI at http://localhost:8000/docs
+2. Create a feature branch
+3. Implement your changes
+4. Add tests and documentation
 5. Submit a pull request
 
-## 📄 License
+## 📝 License
 
-[Add your license information here]
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- OpenAI for GPT models and API
+- PyTorch team for deep learning framework
+- Open WebUI community for interface components
+- Medical imaging datasets contributors
+- MLflow for experiment tracking
+
+## 📞 Support
+
+For technical support or questions:
+- Create an issue on GitHub
+- Check the documentation in `/docs`
+- Review API documentation at http://localhost:8000/docs
 
 ---
 
-**Happy coding! 🚀** 
+<div align="center">
+
+**OpenMed - Advancing Medical AI for Better Healthcare**
+
+*Made with ❤️ for the medical community*
+
+</div> 
