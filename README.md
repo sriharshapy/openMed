@@ -27,6 +27,18 @@ OpenMed is a comprehensive AI-powered medical imaging analysis platform that com
 - 🎯 **Transfer Learning**: Pre-trained ResNet50 and Vision Transformer models
 - 🛡️ **Production Ready**: Robust error handling and monitoring
 
+### Platform Interface
+
+**OpenMed Web Interface - Medical Image Analysis**
+
+![OpenMed Interface 1](docs/screenshots/UI1.png)
+
+**Interactive Chat Interface for Medical Consultations**
+
+![OpenMed Interface 2](docs/screenshots/UI2.png)
+
+*The OpenMed platform provides an intuitive web interface that enables healthcare professionals to upload medical images, interact with the AI agent through natural language, and receive comprehensive analysis results with visual explanations.*
+
 ## 🔍 Interpretability, Trust & Transparency in Medical AI
 
 In the medical domain, the stakes for AI decision-making are exceptionally high, where incorrect diagnoses can have life-altering consequences. **Trust, interpretability, and transparency are not just desirable features but essential requirements** for successful adoption of AI systems in healthcare.
