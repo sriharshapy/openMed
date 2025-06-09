@@ -229,24 +229,168 @@ graph TB
 
 ### Quick Launch
 
-1. **Start the backend API**
-   ```bash
-   cd src/middleware
-   python run_backend.py
-   ```
+#### Step 1: Start the Unified Models API
 
-2. **Launch the web interface**
-   ```bash
-   # Windows
-   run_openweb.bat
-   
-   # Linux/Mac
-   open-webui serve --host 0.0.0.0 --port 3000
-   ```
+The OpenMed API integrates all medical models into a single service for streamlined deployment.
 
-3. **Access the interface**
-   - Web UI: http://localhost:3000
-   - API Documentation: http://localhost:8000/docs
+```bash
+# Navigate to the middleware directory
+cd src/middleware
+
+# Start the unified API server (this loads all medical models)
+python run_backend.py
+```
+
+**What happens during startup:**
+- ✅ Loads pneumonia detection model (ResNet50)
+- ✅ Loads tuberculosis detection model (ResNet50) 
+- ✅ Loads brain tumor classification model (ResNet50)
+- ✅ Initializes GradCAM visualization engine
+- ✅ Starts OpenAI-compatible API endpoints on port 8000
+- ✅ Enables intelligent medical agent
+
+**Expected startup output:**
+```
+INFO: Loading pneumonia detection model...
+INFO: Loading tuberculosis detection model...
+INFO: Loading brain tumor classification model...
+INFO: All models loaded successfully
+INFO: Starting OpenMed Unified API on http://0.0.0.0:8000
+INFO: API documentation available at http://localhost:8000/docs
+```
+
+#### Step 2: Verify API is Running
+
+Test that all models are loaded and accessible:
+
+```bash
+# Test API health (should show all models as "loaded")
+curl -X GET http://localhost:8000/health
+
+# List available models
+curl -X GET http://localhost:8000/v1/models
+
+# Test a quick analysis (optional)
+curl -X POST http://localhost:8000/v1/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"test": true}'
+```
+
+**Expected health response for Unified API (Port 8000):**
+```json
+{
+  "status": "healthy",
+  "models": {
+    "pneumonia_detection": "loaded",
+    "tuberculosis_detection": "loaded", 
+    "brain_tumor_classification": "loaded"
+  },
+  "services": {
+    "unified_api": "running",
+    "agent": "running",
+    "gradcam": "available"
+  }
+}
+```
+
+**Expected health response for ResNet50 Model API (Port 6010):**
+```json
+{
+  "status": "healthy",
+  "models_loaded": {
+    "pneumonia": true,
+    "brain_tumor": true,
+    "tb": true
+  },
+  "device": "cuda"
+}
+```
+
+#### Step 3: Launch the Web Interface
+
+```bash
+# Windows
+run_openweb.bat
+
+# Linux/Mac  
+open-webui serve --host 0.0.0.0 --port 3000
+```
+
+#### Step 4: (Optional) Start ResNet50 Direct Model API
+
+For direct access to ResNet50 models with comprehensive GradCAM support, you can also run the dedicated models API:
+
+```bash
+# Navigate to models_layered directory
+cd src/models_layered
+
+# Start the ResNet50 Full Model API (runs on port 6010)
+python resnet50_full.py
+```
+
+**What this API provides:**
+- 🏥 **Direct model access** without conversational interface
+- 🔬 **Dedicated endpoints** for each disease type
+- 📊 **Advanced GradCAM** visualization capabilities
+- ⚡ **Optimized inference** for batch processing
+- 🎯 **Detailed prediction results** with confidence scores
+
+**Available endpoints:**
+- Health check: http://localhost:6010/health
+- API docs: http://localhost:6010/docs
+- Pneumonia prediction: http://localhost:6010/predict/pneumonia
+- Brain tumor prediction: http://localhost:6010/predict/brain_tumor  
+- TB prediction: http://localhost:6010/predict/tb
+- Model info: http://localhost:6010/model_info
+
+#### Step 5: Access the Platform
+
+- **Web UI**: http://localhost:3000
+- **Main API Documentation**: http://localhost:8000/docs
+- **ResNet50 Model API Documentation**: http://localhost:6010/docs
+- **Health Check (Main)**: http://localhost:8000/health
+- **Health Check (Models)**: http://localhost:6010/health
+- **Models List**: http://localhost:8000/v1/models
+
+#### Quick API Test
+
+Once the API is running, test it with a simple request:
+
+```python
+import requests
+
+# Test the API is responding
+response = requests.get("http://localhost:8000/health")
+print("API Status:", response.json()["status"])
+
+# Test models endpoint
+models = requests.get("http://localhost:8000/v1/models")
+print("Available Models:", [m["id"] for m in models.json()["data"]])
+```
+
+#### Troubleshooting Startup Issues
+
+**If models fail to load:**
+```bash
+# Check if model checkpoints exist
+ls -la checkpoints/
+# Should contain: pneumonia_model.pth, tb_model.pth, brain_tumor_model.pth
+```
+
+**If CUDA memory issues occur:**
+```bash
+# Force CPU usage
+export CUDA_VISIBLE_DEVICES=""
+python run_backend.py
+```
+
+**If port 8000 is in use:**
+```bash
+# Check what's using port 8000
+netstat -tulpn | grep :8000
+# Kill the process or use a different port
+python run_backend.py --port 8001
+```
 
 > **⚠️ Important**: OpenMed now uses a **unified API architecture**. All medical models and services run on a single API server (port 8000). There are no separate services for feature extraction or classification. This change simplifies deployment and improves performance.
 
@@ -317,7 +461,73 @@ All models and services are integrated into a single API endpoint:
 
 > **Note**: OpenMed uses a unified API architecture where all medical models (pneumonia, tuberculosis, brain tumor detection) are integrated into a single FastAPI service running on port 8000. This simplifies deployment, reduces resource usage, and provides a consistent interface for all medical analysis tasks.
 
-### 4. Visual Explanations (`src/utils/`)
+### 4. ResNet50 Direct Model API (`src/models_layered/`)
+
+Comprehensive FastAPI service providing direct access to ResNet50 models:
+
+**Key Features:**
+- **Multi-Disease Support**: Pneumonia, Tuberculosis, Brain Tumor detection
+- **Advanced GradCAM**: Comprehensive visualization with configurable target classes
+- **Optimized Performance**: Direct model access without conversational overhead
+- **Detailed Responses**: Complete prediction information with probabilities
+- **Model Management**: Dynamic loading and health monitoring
+
+**API Endpoints:**
+```python
+# Pneumonia Detection
+POST /predict/pneumonia
+{
+    "image_base64": "...",
+    "generate_gradcam": true,
+    "target_class": null
+}
+
+# Brain Tumor Classification  
+POST /predict/brain_tumor
+{
+    "image_base64": "...",
+    "generate_gradcam": true
+}
+
+# Tuberculosis Detection
+POST /predict/tb
+{
+    "image_base64": "...",
+    "generate_gradcam": true
+}
+
+# Model Information
+GET /model_info
+GET /model_info/{disease_type}
+GET /health
+```
+
+**Usage Example:**
+```python
+import requests
+import base64
+
+# Load and encode medical image
+with open("chest_xray.jpg", "rb") as f:
+    img_data = base64.b64encode(f.read()).decode()
+
+# Direct pneumonia prediction
+response = requests.post(
+    "http://localhost:6010/predict/pneumonia",
+    json={
+        "image_base64": img_data,
+        "generate_gradcam": True,
+        "target_class": None
+    }
+)
+
+result = response.json()
+print(f"Prediction: {result['prediction_label']}")
+print(f"Confidence: {result['confidence']:.2%}")
+print(f"GradCAM: {len(result['gradcam_heatmap'])} available" if result['gradcam_heatmap'] else "No GradCAM")
+```
+
+### 5. Visual Explanations (`src/utils/`)
 
 GradCAM-based interpretability:
 - Highlights regions of interest in medical images
@@ -444,17 +654,22 @@ ls -la src/
 
 ### 2. Backend API Testing
 
-**Start Backend Service**
+**Start Backend Services**
 ```bash
-# Start the unified API server (all models integrated)
+# Option 1: Start the unified API server (recommended for most users)
 cd src/middleware
 python run_backend.py
+# Unified API serves all models on port 8000
 
-# The unified API serves all models on port 8000
-# No need to start separate services
+# Option 2: Start the ResNet50 Direct Model API (for advanced users)
+cd src/models_layered
+python resnet50_full.py
+# Direct model API serves on port 6010 with dedicated endpoints
 ```
 
 **API Health Check Tests**
+
+*For Unified API (Port 8000):*
 ```bash
 # Test unified API health endpoint
 curl -X GET http://localhost:8000/health
@@ -464,6 +679,20 @@ curl -X GET http://localhost:8000/v1/models
 
 # Test analysis endpoint availability
 curl -X GET http://localhost:8000/v1/analyze/health
+```
+
+*For ResNet50 Direct Model API (Port 6010):*
+```bash
+# Test ResNet50 model API health
+curl -X GET http://localhost:6010/health
+
+# Get model information
+curl -X GET http://localhost:6010/model_info
+
+# Test specific disease model info
+curl -X GET http://localhost:6010/model_info/pneumonia
+curl -X GET http://localhost:6010/model_info/brain_tumor
+curl -X GET http://localhost:6010/model_info/tb
 ```
 
 **Expected Response for Health Check:**
@@ -614,7 +843,150 @@ print(f"Direct Analysis - Confidence: {result.get('confidence')}")
 print(f"Direct Analysis - GradCAM: {result.get('gradcam_available')}")
 ```
 
-### 7. Web Interface Testing
+### 7. ResNet50 Direct Model API Testing
+
+**Test Disease-Specific Endpoints**
+
+*Pneumonia Detection:*
+```python
+import requests
+import base64
+
+# Load test chest X-ray
+with open("test_images/chest_xray_pneumonia.jpg", "rb") as f:
+    img_data = base64.b64encode(f.read()).decode()
+
+# Test pneumonia prediction with GradCAM
+response = requests.post(
+    "http://localhost:6010/predict/pneumonia",
+    json={
+        "image_base64": img_data,
+        "generate_gradcam": True,
+        "target_class": None  # Use predicted class
+    }
+)
+
+result = response.json()
+print(f"Pneumonia Prediction: {result['prediction_label']}")
+print(f"Confidence: {result['confidence']:.2%}")
+print(f"GradCAM Generated: {'Yes' if result['gradcam_heatmap'] else 'No'}")
+```
+
+*Brain Tumor Classification:*
+```python
+# Load test brain MRI
+with open("test_images/brain_mri_tumor.jpg", "rb") as f:
+    img_data = base64.b64encode(f.read()).decode()
+
+# Test brain tumor prediction
+response = requests.post(
+    "http://localhost:6010/predict/brain_tumor",
+    json={
+        "image_base64": img_data,
+        "generate_gradcam": True
+    }
+)
+
+result = response.json()
+print(f"Brain Tumor Type: {result['prediction_label']}")
+print(f"Confidence: {result['confidence']:.2%}")
+print(f"All Probabilities: {result['probabilities']}")
+```
+
+*Tuberculosis Detection:*
+```python
+# Load test TB X-ray
+with open("test_images/chest_xray_tb.jpg", "rb") as f:
+    img_data = base64.b64encode(f.read()).decode()
+
+# Test TB prediction
+response = requests.post(
+    "http://localhost:6010/predict/tb",
+    json={
+        "image_base64": img_data,
+        "generate_gradcam": True
+    }
+)
+
+result = response.json()
+print(f"TB Prediction: {result['prediction_label']}")
+print(f"Confidence: {result['confidence']:.2%}")
+```
+
+**Test Model Information Endpoints**
+```python
+# Get information about all models
+models_info = requests.get("http://localhost:6010/model_info")
+print("All Models Info:", models_info.json())
+
+# Get specific model information
+pneumonia_info = requests.get("http://localhost:6010/model_info/pneumonia")
+print("Pneumonia Model Info:", pneumonia_info.json())
+```
+
+**Expected Response Format:**
+```json
+{
+  "success": true,
+  "disease_type": "pneumonia",
+  "predicted_class": 1,
+  "confidence": 0.87,
+  "probabilities": [0.13, 0.87],
+  "prediction_label": "Pneumonia",
+  "class_names": ["Normal", "Pneumonia"],
+  "gradcam_heatmap": [[0.1, 0.2, ...], ...],
+  "target_class": 1,
+  "message": "Successfully predicted Pneumonia with 87.00% confidence"
+}
+```
+
+**Performance Testing for ResNet50 API**
+```python
+import asyncio
+import aiohttp
+import time
+
+async def test_resnet50_concurrent_requests():
+    """Test concurrent requests to ResNet50 API"""
+    async with aiohttp.ClientSession() as session:
+        # Test data
+        with open("test_images/chest_xray_normal.jpg", "rb") as f:
+            img_data = base64.b64encode(f.read()).decode()
+        
+        tasks = []
+        start_time = time.time()
+        
+        # Create 5 concurrent requests to different endpoints
+        endpoints = [
+            "http://localhost:6010/predict/pneumonia",
+            "http://localhost:6010/predict/brain_tumor", 
+            "http://localhost:6010/predict/tb",
+            "http://localhost:6010/predict/pneumonia",
+            "http://localhost:6010/predict/tb"
+        ]
+        
+        for endpoint in endpoints:
+            task = session.post(
+                endpoint,
+                json={
+                    "image_base64": img_data,
+                    "generate_gradcam": False  # Faster without GradCAM
+                }
+            )
+            tasks.append(task)
+        
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+        end_time = time.time()
+        
+        successful = sum(1 for r in responses if hasattr(r, 'status') and r.status == 200)
+        print(f"ResNet50 API: {successful}/{len(tasks)} requests successful")
+        print(f"Total time: {end_time - start_time:.2f} seconds")
+
+# Run the test
+asyncio.run(test_resnet50_concurrent_requests())
+```
+
+### 8. Web Interface Testing
 
 **Manual Web UI Testing Checklist**
 
@@ -838,6 +1210,7 @@ openMed/
 ├── src/
 │   ├── agent/              # Intelligent agent
 │   ├── middleware/         # Unified API services
+│   ├── models_layered/     # ResNet50 Direct Model API
 │   ├── rd/                 # Research & development models
 │   ├── utils/              # Utility functions (including GradCAM)
 │   └── nb/                 # Jupyter notebooks
