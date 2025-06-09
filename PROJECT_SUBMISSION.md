@@ -1,5 +1,5 @@
-# OpenMed: AI-Powered Medical Imaging Analysis Platform
-*Advancing Medical AI for Better Healthcare*
+# OpenMed: AI-Powered Medical Imaging Analysis Platform with Interpretability
+*Advancing Medical AI for Better Healthcare with Trust and Transperancy*
 
 ---
 
@@ -11,6 +11,24 @@ The inspiration for OpenMed came from witnessing the critical challenges facing 
 - **Medical imaging expertise** is scarce in underserved regions
 - **Human error** in medical diagnosis affects millions of patients annually
 - **Second opinions** are often unavailable or delayed in critical situations
+- **AI mistrust in healthcare** stems from "black box" systems that provide no explanation for their decisions
+
+**The Interpretability Crisis in Medical AI**
+
+A pivotal moment in our inspiration came from conversations with radiologists who expressed deep skepticism about existing AI diagnostic tools. They shared frustrating experiences with AI systems that would flag potential diseases but provide no explanation of their reasoning. One radiologist told us: *"I can't stake my medical license on a system that won't show me why it thinks there's a problem. If I can't understand the AI's reasoning, how can I trust it with my patients' lives?"*
+
+This highlighted a fundamental barrier to AI adoption in healthcare:
+- **Trust requires transparency**: Medical professionals need to understand AI decision-making processes
+- **Clinical accountability**: Doctors remain legally responsible for diagnoses, requiring explainable AI recommendations
+- **Educational value**: Interpretable AI can serve as a teaching tool for medical students and residents
+- **Bias detection**: Visual explanations help identify when AI models focus on irrelevant image artifacts
+- **Quality assurance**: Interpretability enables validation that AI is "looking" at clinically relevant anatomical regions
+
+**OpenMed's Answer: Visual AI Explanations**
+
+![GradCAM Brain Tumor Interpretability](https://raw.githubusercontent.com/sriharshapy/openMed/refs/heads/main/docs/screenshots/gradcam_brain_tumor.png)
+
+*Our GradCAM visualization technology addresses the interpretability crisis by showing exactly which brain regions influenced the AI's tumor detection decision. The heat map overlay allows radiologists to validate that the AI is focusing on medically relevant anatomical structures, building trust through transparency.*
 
 We were particularly moved by stories of:
 - Rural hospitals lacking radiologists for urgent chest X-ray interpretations
@@ -19,6 +37,18 @@ We were particularly moved by stories of:
 - Patients waiting weeks for specialist consultations that could be expedited with AI assistance
 
 **The vision was clear**: Create an AI system that doesn't replace medical professionals but empowers them with intelligent, interpretable, and trustworthy assistance. We wanted to democratize access to advanced medical imaging analysis while maintaining the highest standards of clinical accuracy and transparency.
+
+**Our Interpretability-First Approach**
+
+We recognized that for medical AI to gain widespread adoption, interpretability couldn't be an afterthought—it had to be foundational. Our mission became:
+
+- **Build trust through transparency**: Every AI decision comes with visual explanations showing which image regions influenced the diagnosis
+- **Enable clinical validation**: Provide tools for medical professionals to verify that AI reasoning aligns with medical knowledge
+- **Foster AI-human collaboration**: Create a partnership where AI augments human expertise rather than obscuring it
+- **Accelerate medical education**: Transform AI explanations into powerful learning tools for the next generation of healthcare providers
+- **Ensure ethical AI deployment**: Maintain accountability and prevent algorithmic bias through interpretable systems
+
+This interpretability-first philosophy guided every design decision, from our GradCAM visualization system to our conversational AI interface that explains medical reasoning in plain language.
 
 ## What it does
 
@@ -51,7 +81,7 @@ Building OpenMed required integrating cutting-edge AI technologies with robust s
 
 ### Technical Architecture
 
-![OpenMed System Architecture](docs/screenshots/arch.png)
+![OpenMed System Architecture](https://raw.githubusercontent.com/sriharshapy/openMed/refs/heads/main/docs/screenshots/arch.png)
 
 *The OpenMed platform architecture showcases the integration of multiple AI models, intelligent agent system, and user interfaces working together to provide comprehensive medical imaging analysis.*
 
@@ -92,7 +122,7 @@ Building OpenMed required integrating cutting-edge AI technologies with robust s
 
 **Model Training and Tracking with HP AI Studio**
 
-![Model Registration and Tracking](docs/screenshots/model_reg.png)
+![Model Registration and Tracking](https://raw.githubusercontent.com/sriharshapy/openMed/refs/heads/main/docs/screenshots/model_reg.png)
 
 *HP AI Studio provided the comprehensive development environment for training, tracking, and managing our medical AI models with MLflow integration.*
 
