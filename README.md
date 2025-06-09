@@ -143,28 +143,20 @@ graph TB
         B[Web Browser]
     end
     
-    subgraph "API Gateway"
-        C[OpenAI Compatible API]
-        D[Middleware Layer]
-    end
-    
-    subgraph "AI Services"
+    subgraph "Unified API Service (Port 8000)"
+        C[OpenAI Compatible Endpoints]
+        D[Request Router]
         E[Intelligent Agent]
         F[Medical Intent Classification]
-        G[Disease Detection Models]
+        G[Integrated Model Manager]
+        L[GradCAM Generator]
     end
     
-    subgraph "ML Models"
+    subgraph "Integrated ML Models"
         H[ResNet50 Pneumonia]
         I[ResNet50 Tuberculosis]
         J[ResNet50 Brain Tumor]
         K[Vision Transformer]
-    end
-    
-    subgraph "Analysis Tools"
-        L[GradCAM Visualization]
-        M[Feature Extraction]
-        N[Classification Layer]
     end
     
     subgraph "Infrastructure"
@@ -177,21 +169,20 @@ graph TB
     A --> C
     C --> D
     D --> E
-    E --> F
-    F --> G
+    D --> F
+    D --> G
+    D --> L
     G --> H
     G --> I
     G --> J
     G --> K
-    H --> L
-    I --> L
-    J --> L
-    K --> L
-    L --> M
-    M --> N
-    G --> O
+    H --> O
+    I --> O
+    J --> O
+    K --> O
     O --> P
     P --> Q
+    L --> Q
 ```
 
 ## 🚀 Quick Start
@@ -257,6 +248,8 @@ graph TB
    - Web UI: http://localhost:3000
    - API Documentation: http://localhost:8000/docs
 
+> **⚠️ Important**: OpenMed now uses a **unified API architecture**. All medical models and services run on a single API server (port 8000). There are no separate services for feature extraction or classification. This change simplifies deployment and improves performance.
+
 ## 🔧 System Components
 
 ### 1. Intelligent Agent (`src/agent/`)
@@ -300,25 +293,29 @@ python resnet50_tb_full.py
 python resnet50_brain_tumor_full.py
 ```
 
-### 3. API Services (`src/middleware/`)
+### 3. Unified API Service (`src/middleware/`)
 
-RESTful APIs with OpenAI compatibility:
+Single RESTful API with OpenAI compatibility that integrates all medical models:
 
 #### Core Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/v1/models` | GET | List available models |
-| `/v1/chat/completions` | POST | Chat-based medical analysis |
-| `/v1/completions` | POST | Text completion |
-| `/health` | GET | System health check |
+| `/v1/models` | GET | List available medical models |
+| `/v1/chat/completions` | POST | Chat-based medical analysis with conversational AI |
+| `/v1/analyze` | POST | Direct medical image analysis |
+| `/v1/gradcam` | POST | Generate GradCAM visualizations |
+| `/health` | GET | System and model health check |
 
-#### Model-Specific APIs
+#### Unified API Architecture
+
+All models and services are integrated into a single API endpoint:
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Feature Extractor | 6001 | Extract features from medical images |
-| Classifier | 6005 | Classify extracted features |
+| OpenMed Unified API | 8000 | Complete medical imaging analysis with all models integrated |
+
+> **Note**: OpenMed uses a unified API architecture where all medical models (pneumonia, tuberculosis, brain tumor detection) are integrated into a single FastAPI service running on port 8000. This simplifies deployment, reduces resource usage, and provides a consistent interface for all medical analysis tasks.
 
 ### 4. Visual Explanations (`src/utils/`)
 
@@ -398,19 +395,438 @@ print(result['choices'][0]['message']['content'])
 ### 3. Direct Model Inference
 
 ```python
-# Feature extraction
+# Direct analysis with integrated API
 response = requests.post(
-    "http://localhost:6001/extract_features",
-    json={"image_base64": img_data}
+    "http://localhost:8000/v1/analyze",
+    json={
+        "image": img_data,
+        "disease_type": "pneumonia",  # or "tuberculosis", "brain_tumor"
+        "include_gradcam": True
+    }
 )
-features = response.json()["features"]
 
-# Classification
-response = requests.post(
-    "http://localhost:6005/classify",
-    json={"features": features}
+result = response.json()
+print(f"Prediction: {result['prediction']}")
+print(f"Confidence: {result['confidence']}")
+print(f"GradCAM available: {result['gradcam_path']}")
+```
+
+## 🧪 Testing Instructions
+
+This section provides comprehensive testing instructions for the OpenMed platform to ensure all components function correctly before deployment.
+
+### Prerequisites for Testing
+
+Before running tests, ensure you have:
+- All dependencies installed via `pip install -r requirements.txt`
+- Virtual environment activated
+- OpenAI API key configured in `.env` file
+- Test images available in `test_images/` directory
+- Sufficient disk space for temporary test files
+
+### 1. System Health Check
+
+**Quick System Verification**
+```bash
+# Test basic system health
+python -c "import torch; print(f'PyTorch: {torch.__version__}')"
+python -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}')"
+python -c "import fastapi; print(f'FastAPI: {fastapi.__version__}')"
+```
+
+**Environment Verification**
+```bash
+# Check if all required directories exist
+ls -la checkpoints/
+ls -la test_images/
+ls -la src/
+```
+
+### 2. Backend API Testing
+
+**Start Backend Service**
+```bash
+# Start the unified API server (all models integrated)
+cd src/middleware
+python run_backend.py
+
+# The unified API serves all models on port 8000
+# No need to start separate services
+```
+
+**API Health Check Tests**
+```bash
+# Test unified API health endpoint
+curl -X GET http://localhost:8000/health
+
+# Test models endpoint
+curl -X GET http://localhost:8000/v1/models
+
+# Test analysis endpoint availability
+curl -X GET http://localhost:8000/v1/analyze/health
+```
+
+**Expected Response for Health Check:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "version": "1.0.0",
+  "models": {
+    "pneumonia_detection": "loaded",
+    "tuberculosis_detection": "loaded",
+    "brain_tumor_classification": "loaded"
+  },
+  "services": {
+    "unified_api": "running",
+    "agent": "running",
+    "gradcam": "available"
+  }
+}
+```
+
+### 3. Model Inference Testing
+
+**Test Individual Models**
+```bash
+# Test pneumonia detection model
+cd src/rd
+python test_pneumonia_model.py --image_path ../../test_images/chest_xray_normal.jpg
+
+# Test tuberculosis detection model
+python test_tb_model.py --image_path ../../test_images/chest_xray_tb.jpg
+
+# Test brain tumor classification model
+python test_brain_tumor_model.py --image_path ../../test_images/brain_mri_tumor.jpg
+```
+
+**Expected Model Output:**
+```json
+{
+  "prediction": "pneumonia",
+  "confidence": 0.87,
+  "processing_time": 2.3,
+  "model_version": "v1.2.0"
+}
+```
+
+### 4. GradCAM Visualization Testing
+
+**Test GradCAM Generation**
+```python
+# Run GradCAM test script
+cd src/utils
+python test_gradcam.py
+
+# Expected: GradCAM images saved to gradcam_results/test_output/
+```
+
+**Manual GradCAM Test**
+```python
+from src.utils.gradcam import generate_gradcam
+
+# Test GradCAM for pneumonia
+result = generate_gradcam(
+    model_path="../../checkpoints/pneumonia_model.pth",
+    image_path="../../test_images/chest_xray_pneumonia.jpg",
+    target_class="pneumonia"
 )
-prediction = response.json()["predicted_classes"]
+
+print(f"GradCAM generated: {result['gradcam_path']}")
+print(f"Confidence: {result['confidence']}")
+```
+
+### 5. Intelligent Agent Testing
+
+**Test Medical Intent Classification**
+```python
+cd src/agent
+python test_agent.py
+
+# Test various medical queries
+test_queries = [
+    "Can you analyze this chest X-ray for pneumonia?",
+    "Check this brain MRI for tumors",
+    "What do you see in this TB screening image?",
+    "Hello, how are you today?"  # Non-medical query
+]
+```
+
+**Expected Agent Response:**
+```json
+{
+  "wants_medical_analysis": true,
+  "disease_type": "pneumonia",
+  "confidence": 0.95,
+  "reasoning": "User is requesting pneumonia analysis of chest X-ray"
+}
+```
+
+### 6. Full Integration Testing
+
+**End-to-End API Test with Chat Completions**
+```python
+import requests
+import base64
+import json
+
+# Load test image
+with open("test_images/chest_xray_pneumonia.jpg", "rb") as f:
+    img_data = base64.b64encode(f.read()).decode()
+
+# Test complete workflow via chat completions
+response = requests.post(
+    "http://localhost:8000/v1/chat/completions",
+    json={
+        "model": "openmed-medical-v1",
+        "messages": [
+            {
+                "role": "user",
+                "content": "Analyze this chest X-ray for pneumonia signs"
+            }
+        ],
+        "image": img_data,
+        "temperature": 0.1
+    },
+    headers={"Content-Type": "application/json"}
+)
+
+print(f"Status Code: {response.status_code}")
+print(f"Response: {json.dumps(response.json(), indent=2)}")
+```
+
+**Direct Analysis API Test**
+```python
+# Test direct analysis endpoint (unified API)
+response = requests.post(
+    "http://localhost:8000/v1/analyze",
+    json={
+        "image": img_data,
+        "analysis_type": "pneumonia",
+        "include_gradcam": True,
+        "confidence_threshold": 0.5
+    }
+)
+
+result = response.json()
+print(f"Direct Analysis - Prediction: {result.get('prediction')}")
+print(f"Direct Analysis - Confidence: {result.get('confidence')}")
+print(f"Direct Analysis - GradCAM: {result.get('gradcam_available')}")
+```
+
+### 7. Web Interface Testing
+
+**Manual Web UI Testing Checklist**
+
+1. **Start Web Interface**
+   ```bash
+   # Windows
+   run_openweb.bat
+   
+   # Linux/Mac
+   open-webui serve --host 0.0.0.0 --port 3000
+   ```
+
+2. **Test Scenarios**
+   - [ ] Navigate to http://localhost:3000
+   - [ ] Upload chest X-ray image
+   - [ ] Submit query: "Analyze this for pneumonia"
+   - [ ] Verify response includes:
+     - [ ] Diagnostic prediction
+     - [ ] Confidence score
+     - [ ] GradCAM visualization
+     - [ ] Clinical explanation
+   - [ ] Test with different image types (MRI, different X-rays)
+   - [ ] Test conversation continuity
+   - [ ] Test error handling with invalid files
+
+### 8. Performance Testing
+
+**Load Testing Script**
+```python
+# Test concurrent requests
+import asyncio
+import aiohttp
+import time
+
+async def test_concurrent_requests():
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        start_time = time.time()
+        
+        for i in range(10):  # 10 concurrent requests
+            task = session.post(
+                'http://localhost:8000/v1/chat/completions',
+                json={
+                    "model": "openmed-medical-v1",
+                    "messages": [{"role": "user", "content": "Test message"}]
+                }
+            )
+            tasks.append(task)
+        
+        responses = await asyncio.gather(*tasks)
+        end_time = time.time()
+        
+        print(f"10 concurrent requests completed in {end_time - start_time:.2f} seconds")
+        print(f"Success rate: {sum(1 for r in responses if r.status == 200)}/10")
+
+asyncio.run(test_concurrent_requests())
+```
+
+### 9. MLflow Integration Testing
+
+**Test MLflow Tracking**
+```bash
+# Start MLflow servers
+cd src/rd
+python start_mlflow_servers.py
+
+# Verify MLflow UIs are accessible
+curl -X GET http://localhost:5000  # Pneumonia MLflow
+curl -X GET http://localhost:5001  # TB MLflow
+curl -X GET http://localhost:5002  # Brain Tumor MLflow
+```
+
+**Test Experiment Logging**
+```python
+import mlflow
+import mlflow.pytorch
+
+# Test MLflow logging
+with mlflow.start_run(experiment_id="test_experiment"):
+    mlflow.log_param("test_param", "test_value")
+    mlflow.log_metric("test_metric", 0.95)
+    print("MLflow logging test completed")
+```
+
+### 10. Automated Test Suite
+
+**Run Complete Test Suite**
+```bash
+# Run all automated tests
+python -m pytest tests/ -v --tb=short
+
+# Run specific test categories
+python -m pytest tests/test_models.py -v          # Model tests
+python -m pytest tests/test_api.py -v             # API tests
+python -m pytest tests/test_agent.py -v           # Agent tests
+python -m pytest tests/test_gradcam.py -v         # GradCAM tests
+python -m pytest tests/test_integration.py -v     # Integration tests
+```
+
+**Test Coverage Report**
+```bash
+# Generate test coverage report
+python -m pytest tests/ --cov=src --cov-report=html
+# Open htmlcov/index.html to view coverage report
+```
+
+### 11. Data Quality Testing
+
+**Test Image Processing Pipeline**
+```python
+# Test image preprocessing
+from src.utils.image_processing import preprocess_medical_image
+
+test_images = [
+    "test_images/chest_xray_normal.jpg",
+    "test_images/chest_xray_pneumonia.jpg",
+    "test_images/brain_mri_normal.jpg",
+    "test_images/brain_mri_tumor.jpg"
+]
+
+for img_path in test_images:
+    processed = preprocess_medical_image(img_path)
+    print(f"{img_path}: Shape {processed.shape}, Type {processed.dtype}")
+    assert processed.shape == (224, 224, 3), f"Unexpected shape for {img_path}"
+```
+
+### 12. Security Testing
+
+**Test Input Validation**
+```python
+# Test malicious file upload protection
+import requests
+
+# Test various file types
+test_files = [
+    "test_files/malicious.exe",
+    "test_files/script.js",
+    "test_files/large_file.bin",  # >50MB file
+    "test_files/corrupted_image.jpg"
+]
+
+for file_path in test_files:
+    with open(file_path, "rb") as f:
+        response = requests.post(
+            "http://localhost:8000/upload",
+            files={"file": f}
+        )
+    print(f"{file_path}: Status {response.status_code}")
+    assert response.status_code in [400, 413, 415], f"Security test failed for {file_path}"
+```
+
+### Troubleshooting Common Test Issues
+
+**Issue: CUDA Out of Memory**
+```bash
+# Solution: Reduce batch size or use CPU
+export CUDA_VISIBLE_DEVICES=""  # Force CPU usage
+```
+
+**Issue: API Connection Refused**
+```bash
+# Solution: Check if the unified API service is running
+ps aux | grep python  # Check running Python processes
+netstat -tulpn | grep :8000  # Check if port 8000 is in use
+# Only port 8000 should be in use for the unified API
+```
+
+**Issue: Model Loading Errors**
+```bash
+# Solution: Verify model files exist and are not corrupted
+ls -la checkpoints/
+python -c "import torch; torch.load('checkpoints/pneumonia_model.pth')"
+```
+
+**Issue: OpenAI API Errors**
+```bash
+# Solution: Verify API key and quota
+python -c "import openai; print(openai.api_key)"
+curl -H "Authorization: Bearer $OPENAI_API_KEY" https://api.openai.com/v1/models
+```
+
+### Test Data Requirements
+
+Ensure you have the following test images in `test_images/`:
+- `chest_xray_normal.jpg` - Normal chest X-ray
+- `chest_xray_pneumonia.jpg` - Pneumonia case
+- `chest_xray_tb.jpg` - Tuberculosis case
+- `brain_mri_normal.jpg` - Normal brain MRI
+- `brain_mri_tumor.jpg` - Brain tumor case
+- `brain_mri_glioma.jpg` - Glioma case
+- `brain_mri_meningioma.jpg` - Meningioma case
+
+### Continuous Integration Testing
+
+For automated CI/CD pipelines:
+```yaml
+# .github/workflows/test.yml
+name: OpenMed Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: python -m pytest tests/ -v
 ```
 
 ## 🛠️ Development
@@ -421,10 +837,9 @@ prediction = response.json()["predicted_classes"]
 openMed/
 ├── src/
 │   ├── agent/              # Intelligent agent
-│   ├── middleware/         # API services
-│   ├── models_layered/     # Layered model APIs
+│   ├── middleware/         # Unified API services
 │   ├── rd/                 # Research & development models
-│   ├── utils/              # Utility functions
+│   ├── utils/              # Utility functions (including GradCAM)
 │   └── nb/                 # Jupyter notebooks
 ├── checkpoints/            # Model checkpoints
 ├── gradcam_results/        # GradCAM outputs
@@ -440,7 +855,7 @@ openMed/
 1. **Create model script** in `src/rd/`
 2. **Add GradCAM support** for interpretability
 3. **Configure MLflow** tracking
-4. **Update API endpoints** in middleware
+4. **Integrate model** into unified API in middleware
 5. **Test integration** with web interface
 
 ### Configuration
