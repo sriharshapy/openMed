@@ -59,6 +59,12 @@ gradcam_result = generate_gradcam(
 # Returns: Visual explanation showing areas of concern
 ```
 
+**Example: Brain Tumor Detection with GradCAM Visualization**
+
+![GradCAM Brain Tumor Analysis](docs/screenshots/gradcam_brain_tumor.png)
+
+*The image above demonstrates OpenMed's GradCAM visualization highlighting the regions of interest in brain MRI scans that contribute to tumor detection, providing clinicians with interpretable insights into the AI's decision-making process.*
+
 #### 2. **Confidence Scoring & Uncertainty Quantification**
 - **Prediction Confidence**: Numerical confidence scores (0-100%) for all predictions
 - **Uncertainty Bounds**: Statistical measures of model uncertainty
