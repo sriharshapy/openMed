@@ -200,6 +200,108 @@ We leveraged **HP AI Studio** as our primary development and deployment infrastr
 - **Role**: Experiment tracking, model versioning, and performance monitoring for all medical AI models
 - **Benefits**: Comprehensive model management, reproducible experiments, and seamless deployment workflows
 
+## Pre-trained Models and Accessibility
+
+### 🚀 Ready-to-Use Models on HuggingFace Hub
+
+To make OpenMed accessible to the broader healthcare and research community, we've published all our trained models on HuggingFace Hub:
+
+**Repository**: https://huggingface.co/hitmanonholiday/openmed-medical-imaging-models
+
+This repository contains production-ready, pre-trained ResNet50 models for immediate use, eliminating the need for users to train models from scratch.
+
+### Model Availability
+
+| Model | Purpose | HuggingFace Path | Local Checkpoint Name |
+|-------|---------|------------------|----------------------|
+| **Brain Tumor Classifier** | 3-class brain tumor detection | `resnet50_brain_tumor_full/pytorch_model.bin` | `best_resnet50_brain_tumor_full_trained.pth` |
+| **Tuberculosis Detector** | TB screening from chest X-rays | `resnet50_tb_full/pytorch_model.bin` | `best_resnet50_tb_full_trained.pth` |
+| **Pneumonia Detector** | Pneumonia detection from chest X-rays | `resnet50_pneumonia_full/pytorch_model.bin` | `best_resnet50_pneumonia_full_trained.pth` |
+
+### Quick Setup Instructions
+
+**Automated Setup (Recommended)**:
+```bash
+# Install required dependency
+pip install huggingface-hub
+
+# Run one-time setup script
+python -c "
+from huggingface_hub import hf_hub_download
+import os, shutil
+
+# Create checkpoint directories
+dirs = ['checkpoints/resnet50_brain_tumor_full', 'checkpoints/resnet50_tb_full', 'checkpoints/resnet50_pneumonia_full']
+for d in dirs: os.makedirs(d, exist_ok=True)
+
+# Download and place models
+models = [
+    ('resnet50_brain_tumor_full/pytorch_model.bin', 'checkpoints/resnet50_brain_tumor_full/best_resnet50_brain_tumor_full_trained.pth'),
+    ('resnet50_tb_full/pytorch_model.bin', 'checkpoints/resnet50_tb_full/best_resnet50_tb_full_trained.pth'),
+    ('resnet50_pneumonia_full/pytorch_model.bin', 'checkpoints/resnet50_pneumonia_full/best_resnet50_pneumonia_full_trained.pth')
+]
+
+for hf_path, local_path in models:
+    print(f'Downloading {hf_path}...')
+    downloaded = hf_hub_download(repo_id='hitmanonholiday/openmed-medical-imaging-models', filename=hf_path)
+    shutil.copy2(downloaded, local_path)
+    print(f'✅ Saved to {local_path}')
+
+print('🎉 All models ready for use!')
+"
+```
+
+**Manual Setup**:
+1. Visit: https://huggingface.co/hitmanonholiday/openmed-medical-imaging-models
+2. Download the `pytorch_model.bin` files from each model directory
+3. Rename and place them in the correct `checkpoints/` subdirectories as shown in the table above
+
+### Expected Directory Structure
+
+After setup, your project should have:
+```
+openMed/
+├── checkpoints/
+│   ├── resnet50_brain_tumor_full/
+│   │   └── best_resnet50_brain_tumor_full_trained.pth
+│   ├── resnet50_tb_full/
+│   │   └── best_resnet50_tb_full_trained.pth
+│   └── resnet50_pneumonia_full/
+│       └── best_resnet50_pneumonia_full_trained.pth
+└── ... (other project files)
+```
+
+### Custom Training Option
+
+While pre-trained models provide immediate functionality, users can also train their own models:
+
+**Benefits of Custom Training**:
+- 🎯 **Domain Adaptation**: Fine-tune on institution-specific datasets
+- 🔧 **Hyperparameter Optimization**: Customize for specific hardware configurations
+- 📊 **Population-Specific Models**: Adapt to specific patient demographics or imaging protocols
+- 🚀 **Research Applications**: Experiment with different architectures or training strategies
+
+**Training Commands**:
+```bash
+cd src/rd
+
+# Train custom models
+python resnet50_pneumonia_full.py      # Pneumonia detection
+python resnet50_tb_full.py             # Tuberculosis detection  
+python resnet50_brain_tumor_full.py    # Brain tumor classification
+```
+
+### Deployment Flexibility
+
+The availability of pre-trained models enables multiple deployment scenarios:
+
+1. **Immediate Deployment**: Use pre-trained models for instant setup
+2. **Fine-tuning**: Start with pre-trained weights and adapt to specific datasets
+3. **Research & Development**: Use as baseline models for academic research
+4. **Educational Use**: Enable medical students and researchers to explore AI interpretability
+
+This approach democratizes access to advanced medical AI, enabling healthcare institutions and researchers worldwide to benefit from state-of-the-art medical imaging analysis without requiring extensive computational resources for training.
+
 ## Challenges we ran into
 
 ### Technical Challenges

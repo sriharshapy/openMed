@@ -490,7 +490,91 @@ The deep learning models were trained on the following open source medical imagi
 - **Tuberculosis Chest X-ray Dataset**: Open source tuberculosis chest X-ray dataset from Kaggle [@https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset](https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset)
 - **Chest X-Ray Images (Pneumonia) Dataset**: Open source pneumonia chest X-ray dataset from Kaggle [@https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
 
-#### Model Training
+#### Pre-trained Models
+
+**🚀 Ready-to-Use Models Available on HuggingFace Hub**
+
+All OpenMed models are available as pre-trained models on HuggingFace Hub at:
+**https://huggingface.co/hitmanonholiday/openmed-medical-imaging-models**
+
+##### Quick Setup with Pre-trained Models
+
+Instead of training from scratch, you can download our pre-trained models:
+
+```bash
+# Install huggingface-hub
+pip install huggingface-hub
+
+# Download all models (one-time setup)
+python -c "
+from huggingface_hub import hf_hub_download
+import os
+
+# Create checkpoints directory structure
+os.makedirs('checkpoints/resnet50_brain_tumor_full', exist_ok=True)
+os.makedirs('checkpoints/resnet50_tb_full', exist_ok=True)
+os.makedirs('checkpoints/resnet50_pneumonia_full', exist_ok=True)
+
+# Download pre-trained models
+models = [
+    ('resnet50_brain_tumor_full/pytorch_model.bin', 'checkpoints/resnet50_brain_tumor_full/best_resnet50_brain_tumor_full_trained.pth'),
+    ('resnet50_tb_full/pytorch_model.bin', 'checkpoints/resnet50_tb_full/best_resnet50_tb_full_trained.pth'),
+    ('resnet50_pneumonia_full/pytorch_model.bin', 'checkpoints/resnet50_pneumonia_full/best_resnet50_pneumonia_full_trained.pth')
+]
+
+for hf_path, local_path in models:
+    print(f'Downloading {hf_path}...')
+    downloaded_path = hf_hub_download(
+        repo_id='hitmanonholiday/openmed-medical-imaging-models',
+        filename=hf_path
+    )
+    # Copy to expected location
+    import shutil
+    shutil.copy2(downloaded_path, local_path)
+    print(f'✅ Saved to {local_path}')
+
+print('🎉 All pre-trained models downloaded successfully!')
+"
+```
+
+##### Model Checkpoint Structure
+
+After downloading, your `checkpoints/` directory should look like:
+
+```
+checkpoints/
+├── resnet50_brain_tumor_full/
+│   └── best_resnet50_brain_tumor_full_trained.pth
+├── resnet50_tb_full/
+│   └── best_resnet50_tb_full_trained.pth
+└── resnet50_pneumonia_full/
+    └── best_resnet50_pneumonia_full_trained.pth
+```
+
+##### Alternative: Manual Download and Setup
+
+1. **Visit HuggingFace Repository**: https://huggingface.co/hitmanonholiday/openmed-medical-imaging-models
+2. **Download Model Files**:
+   - `resnet50_brain_tumor_full/pytorch_model.bin` → Rename to `best_resnet50_brain_tumor_full_trained.pth`
+   - `resnet50_tb_full/pytorch_model.bin` → Rename to `best_resnet50_tb_full_trained.pth`  
+   - `resnet50_pneumonia_full/pytorch_model.bin` → Rename to `best_resnet50_pneumonia_full_trained.pth`
+
+3. **Place in Correct Directories**:
+   ```bash
+   # Create checkpoint directories
+   mkdir -p checkpoints/resnet50_brain_tumor_full
+   mkdir -p checkpoints/resnet50_tb_full  
+   mkdir -p checkpoints/resnet50_pneumonia_full
+   
+   # Move downloaded files to correct locations
+   mv best_resnet50_brain_tumor_full_trained.pth checkpoints/resnet50_brain_tumor_full/
+   mv best_resnet50_tb_full_trained.pth checkpoints/resnet50_tb_full/
+   mv best_resnet50_pneumonia_full_trained.pth checkpoints/resnet50_pneumonia_full/
+   ```
+
+#### Custom Model Training (Optional)
+
+If you prefer to train your own models or fine-tune on your datasets:
 
 ```bash
 # Train pneumonia detection model
@@ -503,6 +587,12 @@ python resnet50_tb_full.py
 # Train brain tumor classification model
 python resnet50_brain_tumor_full.py
 ```
+
+**Benefits of Training Your Own Models:**
+- 🎯 **Custom Datasets**: Adapt to your specific medical imaging datasets
+- 🔧 **Hyperparameter Tuning**: Optimize for your hardware and data characteristics  
+- 📊 **Domain Adaptation**: Fine-tune for specific patient populations or imaging protocols
+- 🚀 **Performance Optimization**: Achieve optimal performance for your use case
 
 ### 3. Unified API Service (`src/middleware/`)
 
