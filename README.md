@@ -24,7 +24,7 @@ OpenMed is a comprehensive AI-powered medical imaging analysis platform that com
 - 🌐 **Web Interface**: User-friendly OpenWebUI integration
 - 🔌 **API-First Design**: RESTful APIs for seamless integration
 - 📈 **MLflow Integration**: Comprehensive experiment tracking and model management
-- 🎯 **Transfer Learning**: Pre-trained ResNet50 and Vision Transformer models
+- 🎯 **Transfer Learning**: Pre-trained ResNet50 [Wightman et al., 2021](https://arxiv.org/abs/2110.00476) and Vision Transformer models
 - 🛡️ **Production Ready**: Robust error handling and monitoring
 
 ### Platform Interface
@@ -202,6 +202,47 @@ graph TB
     P --> Q
     L --> Q
 ```
+
+## 🔧 Key Dependencies
+
+OpenMed is built on a foundation of robust, industry-standard technologies:
+
+### **1. OpenWebUI**
+**User-friendly AI Interface**
+- Modern chat interface supporting multiple AI providers
+- Seamless image upload and analysis capabilities  
+- **Repository**: [Open WebUI GitHub](https://github.com/open-webui/open-webui)
+- **Role**: Frontend web interface for medical AI interactions
+
+### **2. FastAPI**
+**High-Performance Web Framework**
+- RESTful API development with automatic documentation
+- OpenAI-compatible endpoint implementations
+- **Role**: Backend services and API orchestration
+
+### **3. Python 3.8+**
+**Core Development Language**
+- Rich ecosystem for medical AI and machine learning
+- Extensive libraries for image processing and deep learning
+- **Role**: Foundation for all platform components
+
+### **4. PyTorch**
+**Deep Learning Framework**
+- Dynamic neural network development and training
+- GPU acceleration for medical image analysis
+- **Role**: ML model training and inference engine
+
+### **5. HP AI Studio**
+**AI Development Platform**
+- GPU-accelerated training environments
+- Integrated MLOps and deployment capabilities
+- **Role**: Primary development and deployment infrastructure
+
+### **6. MLflow**
+**ML Lifecycle Management**
+- Experiment tracking and model versioning
+- Performance monitoring and artifact management
+- **Role**: Comprehensive model management and tracking
 
 ## 🚀 Quick Start
 
@@ -437,9 +478,17 @@ print(result['confidence'])  # 0.95
 
 | Disease | Model | Classes | Accuracy | Data Type |
 |---------|-------|---------|----------|-----------|
-| Pneumonia | ResNet50 | 2 (Normal, Pneumonia) | >85% | Chest X-rays |
-| Tuberculosis | ResNet50 | 2 (Normal, TB) | >85% | Chest X-rays |
-| Brain Tumor | ResNet50 | 3 (Glioma, Meningioma, Tumor) | >70% | Brain MRI |
+| Pneumonia | ResNet50 | 2 (Normal, Pneumonia) | 96.49% | Chest X-rays |
+| Tuberculosis | ResNet50 | 2 (Normal, TB) | 98.65% | Chest X-rays |
+| Brain Tumor | ResNet50 | 3 (Glioma, Meningioma, Tumor) | 97.21% | Brain MRI |
+
+#### Medical Datasets
+
+The deep learning models were trained on the following open source medical imaging datasets:
+
+- **Brain Cancer MRI Dataset**: Open source brain cancer MRI dataset from Kaggle [@https://www.kaggle.com/datasets/orvile/brain-cancer-mri-dataset](https://www.kaggle.com/datasets/orvile/brain-cancer-mri-dataset)
+- **Tuberculosis Chest X-ray Dataset**: Open source tuberculosis chest X-ray dataset from Kaggle [@https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset](https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset)
+- **Chest X-Ray Images (Pneumonia) Dataset**: Open source pneumonia chest X-ray dataset from Kaggle [@https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
 
 #### Model Training
 
@@ -481,7 +530,7 @@ All models and services are integrated into a single API endpoint:
 
 ### 4. ResNet50 Direct Model API (`src/models_layered/`)
 
-Comprehensive FastAPI service providing direct access to ResNet50 models:
+Comprehensive FastAPI service providing direct access to ResNet50 models [Wightman et al., 2021](https://arxiv.org/abs/2110.00476):
 
 **Key Features:**
 - **Multi-Disease Support**: Pneumonia, Tuberculosis, Brain Tumor detection

@@ -15,23 +15,23 @@
 
 | Service | Dependencies | Port | Health Check |
 |---------|-------------|------|--------------|
-| OpenWebUI | Middleware API | 3000 | http://localhost:3000/health |
-| Middleware API | Agent, OpenAI | 8000 | http://localhost:8000/health |
-| Feature Extractor | PyTorch, CUDA | 6001 | http://localhost:6001/health |
-| Classifier API | Feature Extractor | 6005 | http://localhost:6005/health |
+| OpenWebUI | Unified API | 3000 | http://localhost:3000 |
+| Unified API | PyTorch, OpenAI, MLflow | 8000 | http://localhost:8000/health |
+| ResNet50 Direct API | PyTorch, CUDA | 6010 | http://localhost:6010/health |
 | MLflow Pneumonia | None | 5000 | http://localhost:5000 |
 | MLflow TB | None | 5001 | http://localhost:5001 |
 | MLflow Brain Tumor | None | 5002 | http://localhost:5002 |
 
 ### Component Interaction Flow
 
-The system follows a layered architecture where:
+The system follows a unified architecture where:
 
-1. **Frontend Layer**: OpenWebUI provides the user interface
-2. **API Gateway**: Middleware handles request routing and OpenAI compatibility
-3. **AI Services**: Intelligent agent processes medical intent classification
-4. **ML Models**: ResNet50-based disease detection models
-5. **Infrastructure**: MLflow tracking and model storage
+1. **Frontend Layer**: OpenWebUI provides the user interface for medical AI interactions
+2. **Unified API Service**: Single FastAPI service integrating all medical models with OpenAI compatibility
+3. **AI Services**: Intelligent agent processes medical intent classification and conversational AI
+4. **ML Models**: ResNet50-based disease detection models (Pneumonia, TB, Brain Tumor)
+5. **Direct Model API**: Optional ResNet50 Direct API for advanced users requiring detailed model access
+6. **Infrastructure**: MLflow tracking for each medical condition and model storage
 
 ## API Specifications
 
@@ -102,11 +102,11 @@ The system uses ResNet50 models pretrained on ImageNet with the following config
 
 ### Supported Medical Conditions
 
-| Disease | Model | Classes | Expected Accuracy | Data Type |
-|---------|-------|---------|------------------|-----------|
-| Pneumonia | ResNet50 | 2 (Normal, Pneumonia) | >85% | Chest X-rays |
-| Tuberculosis | ResNet50 | 2 (Normal, TB) | >85% | Chest X-rays |
-| Brain Tumor | ResNet50 | 3 (Glioma, Meningioma, Tumor) | >70% | Brain MRI |
+| Disease | Model | Classes | Test Accuracy | Data Type |
+|---------|-------|---------|---------------|-----------|
+| Pneumonia | ResNet50 | 2 (Normal, Pneumonia) | 96.49% | Chest X-rays |
+| Tuberculosis | ResNet50 | 2 (Normal, TB) | 98.65% | Chest X-rays |
+| Brain Tumor | ResNet50 | 3 (Glioma, Meningioma, Tumor) | 97.21% | Brain MRI |
 
 ### GradCAM Interpretability
 

@@ -7,11 +7,12 @@
 
 The inspiration for OpenMed came from witnessing the critical challenges facing healthcare systems worldwide. Medical professionals are overwhelmed with increasing patient loads while facing pressure to make accurate, timely diagnoses. We observed that:
 
+- **AI mistrust in healthcare** stems from "black box" systems that provide no explanation for their decisions
 - **Diagnostic delays** can be life-threatening, especially in emergency settings
 - **Medical imaging expertise** is scarce in underserved regions
 - **Human error** in medical diagnosis affects millions of patients annually
 - **Second opinions** are often unavailable or delayed in critical situations
-- **AI mistrust in healthcare** stems from "black box" systems that provide no explanation for their decisions
+
 
 **The Interpretability Crisis in Medical AI**
 
@@ -69,9 +70,17 @@ OpenMed is a comprehensive AI-powered medical imaging analysis platform that rev
 5. **Quality Assurance**: Continuous monitoring and validation of diagnostic accuracy
 
 ### Supported Medical Conditions
-- **Pneumonia Detection**: Binary classification (Normal vs. Pneumonia) from chest X-rays with >85% accuracy
-- **Tuberculosis Screening**: Early detection of TB patterns in chest radiographs
-- **Brain Tumor Classification**: Multi-class identification of glioma, meningioma, and other tumor types from MRI scans
+
+| Disease | Model | Classes | Test Accuracy | Data Type |
+|---------|-------|---------|---------------|-----------|
+| Pneumonia | ResNet50 | 2 (Normal, Pneumonia) | 96.49% | Chest X-rays |
+| Tuberculosis | ResNet50 | 2 (Normal, TB) | 98.65% | Chest X-rays |
+| Brain Tumor | ResNet50 | 3 (Glioma, Meningioma, Tumor) | 97.21% | Brain MRI |
+
+**Detailed Capabilities:**
+- **Pneumonia Detection**: Binary classification (Normal vs. Pneumonia) from chest X-rays with 96.49% accuracy
+- **Tuberculosis Screening**: Early detection of TB patterns in chest radiographs with 98.65% accuracy
+- **Brain Tumor Classification**: Multi-class identification of glioma, meningioma, and other tumor types from MRI scans with 97.21% accuracy
 
 The platform seamlessly integrates into existing clinical workflows while providing the transparency and interpretability essential for medical decision-making.
 
@@ -86,13 +95,18 @@ Building OpenMed required integrating cutting-edge AI technologies with robust s
 *The OpenMed platform architecture showcases the integration of multiple AI models, intelligent agent system, and user interfaces working together to provide comprehensive medical imaging analysis.*
 
 **1. Deep Learning Foundation**
-- **Model Selection**: Chose ResNet50 architecture for its proven performance in medical imaging
+- **Model Selection**: Chose ResNet50 architecture for its proven performance in medical imaging [Wightman et al., 2021](https://arxiv.org/abs/2110.00476)
 - **Transfer Learning**: Leveraged pre-trained ImageNet weights and fine-tuned on medical datasets
 - **Multi-Model Approach**: Separate specialized models for each medical condition
 - **Vision Transformers**: Implemented advanced transformer architecture for enhanced feature extraction
 
+**Medical Datasets Used:**
+- **Brain Cancer MRI Dataset**: Open source brain cancer MRI dataset from Kaggle [@https://www.kaggle.com/datasets/orvile/brain-cancer-mri-dataset](https://www.kaggle.com/datasets/orvile/brain-cancer-mri-dataset)
+- **Tuberculosis Chest X-ray Dataset**: Open source tuberculosis chest X-ray dataset from Kaggle [@https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset](https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset)
+- **Chest X-Ray Images (Pneumonia) Dataset**: Open source pneumonia chest X-ray dataset from Kaggle [@https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
+
 **2. Interpretability Layer**
-- **GradCAM Integration**: Built custom visualization pipeline to generate attention maps
+- **GradCAM Integration**: Built custom visualization pipeline to generate attention maps based on Gradient-weighted Class Activation Mapping (Grad-CAM) methodology [Selvaraju et al., 2016](https://arxiv.org/abs/1610.02391)
 - **Feature Attribution**: Implemented methods to trace decision pathways back to input regions
 - **Confidence Calibration**: Developed uncertainty quantification techniques for clinical reliability
 
@@ -153,6 +167,39 @@ We leveraged **HP AI Studio** as our primary development and deployment infrastr
 - **Monitoring**: MLflow, custom logging and analytics
 - **Deployment**: Docker, cloud-ready infrastructure
 
+### Key Dependencies
+
+**1. OpenWebUI**
+- **Description**: User-friendly AI interface that supports multiple AI providers including OpenAI API
+- **Role**: Provides the frontend web interface for OpenMed's conversational medical AI
+- **Repository**: [Open WebUI GitHub](https://github.com/open-webui/open-webui)
+- **Benefits**: Streamlined chat interface, image upload capabilities, and seamless integration with FastAPI backends
+
+**2. FastAPI**
+- **Description**: Modern, fast web framework for building APIs with Python based on standard Python type hints
+- **Role**: Powers OpenMed's backend services and provides OpenAI-compatible API endpoints
+- **Benefits**: High performance, automatic API documentation, and easy integration with AI models
+
+**3. Python 3.8+**
+- **Description**: Core programming language for the entire OpenMed platform
+- **Role**: Foundation for all machine learning, API development, and data processing components
+- **Benefits**: Rich ecosystem for AI/ML development, extensive medical imaging libraries, and robust deployment tools
+
+**4. PyTorch**
+- **Description**: Open source machine learning framework for deep learning and neural network development
+- **Role**: Training and inference engine for all medical AI models including ResNet50 architectures
+- **Benefits**: Dynamic computation graphs, excellent GPU acceleration, and strong medical imaging community support
+
+**5. HP AI Studio**
+- **Description**: Comprehensive AI development and deployment platform providing GPU resources and MLOps capabilities
+- **Role**: Primary development infrastructure for model training, experiment tracking, and deployment
+- **Benefits**: Unified development environment, scalable computing resources, and integrated model management
+
+**6. MLflow**
+- **Description**: Open source platform for managing the complete machine learning lifecycle
+- **Role**: Experiment tracking, model versioning, and performance monitoring for all medical AI models
+- **Benefits**: Comprehensive model management, reproducible experiments, and seamless deployment workflows
+
 ## Challenges we ran into
 
 ### Technical Challenges
@@ -205,9 +252,19 @@ We leveraged **HP AI Studio** as our primary development and deployment infrastr
 
 ### Technical Achievements
 
+**Model Performance Summary**
+
+Our ResNet50-based medical AI models achieved exceptional test accuracies across all supported medical conditions:
+
+| Medical Condition | Model Architecture | Classification Type | Test Accuracy | Dataset Size |
+|-------------------|-------------------|-------------------|---------------|--------------|
+| Pneumonia Detection | ResNet50 | Binary (Normal/Pneumonia) | **96.49%** | Chest X-rays |
+| Tuberculosis Detection | ResNet50 | Binary (Normal/TB) | **98.65%** | Chest X-rays |
+| Brain Tumor Classification | ResNet50 | Multi-class (3 types) | **97.21%** | Brain MRI |
+
 **1. High-Accuracy Medical AI Models**
-- Achieved >85% accuracy on pneumonia and tuberculosis detection
-- Developed robust brain tumor classification with >70% multi-class accuracy
+- Achieved 96.49% accuracy on pneumonia detection and 98.65% accuracy on tuberculosis detection
+- Developed robust brain tumor classification with 97.21% multi-class accuracy
 - Successfully validated models on diverse, real-world medical imaging datasets
 
 **2. Breakthrough in Medical AI Interpretability**
