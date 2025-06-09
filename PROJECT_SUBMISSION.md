@@ -51,6 +51,10 @@ Building OpenMed required integrating cutting-edge AI technologies with robust s
 
 ### Technical Architecture
 
+![OpenMed System Architecture](docs/screenshots/arch.png)
+
+*The OpenMed platform architecture showcases the integration of multiple AI models, intelligent agent system, and user interfaces working together to provide comprehensive medical imaging analysis.*
+
 **1. Deep Learning Foundation**
 - **Model Selection**: Chose ResNet50 architecture for its proven performance in medical imaging
 - **Transfer Learning**: Leveraged pre-trained ImageNet weights and fine-tuned on medical datasets
@@ -83,6 +87,34 @@ Building OpenMed required integrating cutting-edge AI technologies with robust s
 - **Test-Driven Development**: Comprehensive testing suite for medical-grade reliability
 - **Clinical Validation**: Collaboration with medical professionals for accuracy verification
 - **Regulatory Compliance**: Built-in HIPAA compliance and FDA guideline adherence
+
+### Development Infrastructure: HP AI Studio
+
+**Model Training and Tracking with HP AI Studio**
+
+![Model Registration and Tracking](docs/screenshots/model_reg.png)
+
+*HP AI Studio provided the comprehensive development environment for training, tracking, and managing our medical AI models with MLflow integration.*
+
+We leveraged **HP AI Studio** as our primary development and deployment infrastructure, which proved instrumental in building OpenMed:
+
+**Training Environment:**
+- **GPU-Accelerated Training**: Utilized HP AI Studio's high-performance computing resources for efficient deep learning model training
+- **Experiment Tracking**: Integrated MLflow within HP AI Studio to track model experiments, hyperparameters, and performance metrics
+- **Model Registry**: Centralized model versioning and artifact management for all medical AI models
+- **Data Pipeline Management**: Streamlined data preprocessing and augmentation workflows
+
+**Deployment Infrastructure:**
+- **Terminal-Based Deployment**: Used HP AI Studio's terminal environments to deploy frontend, middleware, and backend services
+- **Containerized Services**: Deployed Docker containers for consistent environment management across development and production
+- **Scalable Computing**: Leveraged elastic compute resources for handling variable workloads
+- **Integrated Development**: Seamless integration between model development, testing, and deployment phases
+
+**Key Benefits:**
+- **Unified Platform**: Single environment for the entire ML development lifecycle
+- **Resource Efficiency**: On-demand scaling of computational resources based on training requirements
+- **Collaboration**: Shared environments enabling team collaboration and code sharing
+- **Production Readiness**: Smooth transition from development to production deployment
 
 ### Technology Stack
 - **Backend**: Python, FastAPI, PyTorch, OpenAI API
