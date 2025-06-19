@@ -140,6 +140,12 @@ Building OpenMed required integrating cutting-edge AI technologies with robust s
 
 *HP AI Studio provided the comprehensive development environment for training, tracking, and managing our medical AI models with MLflow integration.*
 
+**Comprehensive Metrics Tracking and Monitoring**
+
+![MLflow Metrics Tracking](https://raw.githubusercontent.com/sriharshapy/openMed/refs/heads/main/docs/screenshots/metrics1.png)
+
+*Our MLflow integration within HP AI Studio enabled comprehensive tracking of model performance metrics including accuracy, loss, F1 score, sensitivity, and specificity across all medical AI models. This systematic approach to metrics monitoring ensured consistent model performance validation and enabled data-driven optimization decisions throughout the development lifecycle.*
+
 We leveraged **HP AI Studio** as our primary development and deployment infrastructure, which proved instrumental in building OpenMed:
 
 **Training Environment:**
@@ -180,7 +186,7 @@ We leveraged **HP AI Studio** as our primary development and deployment infrastr
 - **Role**: Powers OpenMed's backend services and provides OpenAI-compatible API endpoints
 - **Benefits**: High performance, automatic API documentation, and easy integration with AI models
 
-**3. Python 3.8+**
+**3. Python 3.11+**
 - **Description**: Core programming language for the entire OpenMed platform
 - **Role**: Foundation for all machine learning, API development, and data processing components
 - **Benefits**: Rich ecosystem for AI/ML development, extensive medical imaging libraries, and robust deployment tools
