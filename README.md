@@ -220,7 +220,7 @@ OpenMed is built on a foundation of robust, industry-standard technologies:
 - OpenAI-compatible endpoint implementations
 - **Role**: Backend services and API orchestration
 
-### **3. Python 3.8+**
+### **3. Python 3.11+**
 **Core Development Language**
 - Rich ecosystem for medical AI and machine learning
 - Extensive libraries for image processing and deep learning
@@ -248,7 +248,7 @@ OpenMed is built on a foundation of robust, industry-standard technologies:
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - CUDA-compatible GPU (recommended)
 - 8GB+ RAM
 - 20GB+ storage space
@@ -1351,7 +1351,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.11
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run tests
